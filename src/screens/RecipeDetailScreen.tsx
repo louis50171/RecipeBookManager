@@ -1,0 +1,589 @@
+// src/screens/RecipeDetailScreen.tsx
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, TextInput, Modal } from 'react-native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RouteProp } from '@react-navigation/native';
+import { RootStackParamList } from '../navigation/AppNavigator';
+import { useApp } from '../contexts/AppContext';
+import { useTheme } from '../contexts/ThemeContext';
+import { Recipe } from '../models/types';
+
+type RecipeDetailScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'RecipeDetail'>;
+type RecipeDetailScreenRouteProp = RouteProp<RootStackParamList, 'RecipeDetail'>;
+
+interface Props {
+  navigation: RecipeDetailScreenNavigationProp;
+  route: RecipeDetailScreenRouteProp;
+}
+
+export default function RecipeDetailScreen({ navigation, route }: Props) {
+  const { recipeId } = route.params;
+  const { recipes, books, deleteRecipe, toggleFavorite, updateRecipe, tags: availableTags } = useApp();
+  const { theme } = useTheme();
+  
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedName, setEditedName] = useState('');
+  const [editedNotes, setEditedNotes] = useState('');
+  const [editedTags, setEditedTags] = useState<string[]>([]);
+  const [showAddTag, setShowAddTag] = useState(false);
+  const [newTagInput, setNewTagInput] = useState('');
+  
+  const recipe = recipes.find(r => r.id === recipeId);
+  const book = recipe?.bookId ? books.find(b => b.id === recipe.bookId) : null;
+
+  const filteredTagSuggestions = availableTags.filter(tag =>
+    newTagInput.length > 0 &&
+    tag.toLowerCase().includes(newTagInput.toLowerCase()) &&
+    !editedTags.includes(tag)
+  );
+
+  if (!recipe) {
+    return (
+      <View style={styles(theme).container}>
+        <Text style={styles(theme).emptyText}>Recette non trouvée</Text>
+      </View>
+    );
+  }
+
+  const startEditing = () => {
+    setEditedName(recipe.name);
+    setEditedNotes(recipe.notes);
+    setEditedTags([...recipe.tags]);
+    setIsEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setIsEditing(false);
+    setEditedName('');
+    setEditedNotes('');
+    setEditedTags([]);
+  };
+
+  const saveEditing = async () => {
+    if (!editedName.trim()) {
+      Alert.alert('Erreur', 'Le nom de la recette est obligatoire');
+      return;
+    }
+
+    const updatedRecipe: Recipe = {
+      ...recipe,
+      name: editedName.trim(),
+      notes: editedNotes.trim(),
+      tags: editedTags,
+    };
+
+    await updateRecipe(updatedRecipe);
+    setIsEditing(false);
+  };
+
+  const handleAddTag = (tag: string) => {
+    if (tag.trim() && !editedTags.includes(tag.trim())) {
+      setEditedTags([...editedTags, tag.trim()]);
+      setNewTagInput('');
+    }
+  };
+
+  const handleRemoveTag = (tag: string) => {
+    setEditedTags(editedTags.filter(t => t !== tag));
+  };
+
+  const quickAddTag = async (tag: string) => {
+    if (!recipe.tags.includes(tag)) {
+      const updatedRecipe: Recipe = {
+        ...recipe,
+        tags: [...recipe.tags, tag],
+      };
+      await updateRecipe(updatedRecipe);
+    }
+  };
+
+  const handleDelete = () => {
+    Alert.alert(
+      'Supprimer la recette',
+      'Êtes-vous sûr de vouloir supprimer cette recette ?',
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Supprimer',
+          style: 'destructive',
+          onPress: async () => {
+            await deleteRecipe(recipeId);
+            navigation.goBack();
+          },
+        },
+      ]
+    );
+  };
+
+  const currentStyles = styles(theme);
+
+  if (isEditing) {
+    return (
+      <ScrollView style={currentStyles.container}>
+        <View style={currentStyles.content}>
+          <Text style={currentStyles.editTitle}>Modifier la recette</Text>
+
+          <Text style={currentStyles.label}>Nom de la recette *</Text>
+          <TextInput
+            style={currentStyles.input}
+            value={editedName}
+            onChangeText={setEditedName}
+            placeholder="Nom de la recette"
+            placeholderTextColor={theme.text.tertiary}
+          />
+
+          <Text style={currentStyles.label}>Tags</Text>
+          <View style={currentStyles.tagsContainer}>
+            {editedTags.map(tag => (
+              <TouchableOpacity
+                key={tag}
+                style={currentStyles.editTag}
+                onPress={() => handleRemoveTag(tag)}
+              >
+                <Text style={currentStyles.editTagText}>{tag} ×</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <TextInput
+            style={currentStyles.input}
+            value={newTagInput}
+            onChangeText={setNewTagInput}
+            placeholder="Ajouter un tag..."
+            placeholderTextColor={theme.text.tertiary}
+            onSubmitEditing={() => handleAddTag(newTagInput)}
+          />
+
+          {newTagInput.length > 0 && (
+            <View style={currentStyles.suggestions}>
+              {filteredTagSuggestions.length > 0 ? (
+                filteredTagSuggestions.slice(0, 5).map(tag => (
+                  <TouchableOpacity
+                    key={tag}
+                    style={currentStyles.suggestion}
+                    onPress={() => handleAddTag(tag)}
+                  >
+                    <Text style={currentStyles.suggestionText}>{tag}</Text>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <TouchableOpacity
+                  style={currentStyles.suggestion}
+                  onPress={() => handleAddTag(newTagInput)}
+                >
+                  <Text style={currentStyles.suggestionText}>Créer "{newTagInput}"</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+
+          <Text style={currentStyles.label}>Notes personnelles</Text>
+          <TextInput
+            style={[currentStyles.input, currentStyles.textArea]}
+            value={editedNotes}
+            onChangeText={setEditedNotes}
+            placeholder="Notes..."
+            placeholderTextColor={theme.text.tertiary}
+            multiline
+            numberOfLines={6}
+            textAlignVertical="top"
+          />
+
+          <View style={currentStyles.editButtons}>
+            <TouchableOpacity style={currentStyles.cancelButton} onPress={cancelEditing}>
+              <Text style={currentStyles.cancelButtonText}>Annuler</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={currentStyles.saveEditButton} onPress={saveEditing}>
+              <Text style={currentStyles.saveEditButtonText}>Enregistrer</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    );
+  }
+
+  return (
+    <ScrollView style={currentStyles.container}>
+      <View style={currentStyles.content}>
+        <View style={currentStyles.header}>
+          <Text style={currentStyles.title}>{recipe.name}</Text>
+          <View style={currentStyles.headerActions}>
+            <TouchableOpacity onPress={startEditing} style={currentStyles.editIconButton}>
+              <Text style={currentStyles.editIcon}>✏️</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => toggleFavorite(recipeId)}>
+              <Text style={currentStyles.favoriteIcon}>
+                {recipe.isFavorite ? '⭐' : '☆'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={currentStyles.section}>
+          <Text style={currentStyles.sectionTitle}>Source</Text>
+          {book ? (
+            <TouchableOpacity
+              style={currentStyles.bookLink}
+              onPress={() => navigation.navigate('BookDetail', { bookId: book.id })}
+            >
+              <Text style={currentStyles.bookLinkText}>📚 {book.title}</Text>
+            </TouchableOpacity>
+          ) : (
+            <Text style={currentStyles.infoText}>Recette personnelle</Text>
+          )}
+        </View>
+
+        {recipe.tags.length > 0 && (
+          <View style={currentStyles.section}>
+            <View style={currentStyles.sectionHeader}>
+              <Text style={currentStyles.sectionTitle}>Tags</Text>
+              <TouchableOpacity 
+                style={currentStyles.addTagButton}
+                onPress={() => setShowAddTag(true)}
+              >
+                <Text style={currentStyles.addTagButtonText}>+ Ajouter</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={currentStyles.tagsContainer}>
+              {recipe.tags.map((tag, index) => (
+                <View key={index} style={currentStyles.tag}>
+                  <Text style={currentStyles.tagText}>{tag}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {recipe.tags.length === 0 && (
+          <View style={currentStyles.section}>
+            <Text style={currentStyles.sectionTitle}>Tags</Text>
+            <TouchableOpacity 
+              style={currentStyles.emptyTagButton}
+              onPress={() => setShowAddTag(true)}
+            >
+              <Text style={currentStyles.emptyTagButtonText}>+ Ajouter des tags</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {recipe.notes && (
+          <View style={currentStyles.section}>
+            <Text style={currentStyles.sectionTitle}>Notes personnelles</Text>
+            <Text style={currentStyles.notes}>{recipe.notes}</Text>
+          </View>
+        )}
+
+        <TouchableOpacity style={currentStyles.deleteButton} onPress={handleDelete}>
+          <Text style={currentStyles.deleteButtonText}>Supprimer cette recette</Text>
+        </TouchableOpacity>
+      </View>
+
+      <Modal
+        visible={showAddTag}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowAddTag(false)}
+      >
+        <TouchableOpacity 
+          style={currentStyles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowAddTag(false)}
+        >
+          <View style={currentStyles.modalContent}>
+            <Text style={currentStyles.modalTitle}>Ajouter un tag</Text>
+            <View style={currentStyles.quickTagsContainer}>
+              {availableTags.filter(tag => !recipe.tags.includes(tag)).slice(0, 12).map(tag => (
+                <TouchableOpacity
+                  key={tag}
+                  style={currentStyles.quickTag}
+                  onPress={async () => {
+                    await quickAddTag(tag);
+                    setShowAddTag(false);
+                  }}
+                >
+                  <Text style={currentStyles.quickTagText}>{tag}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <TouchableOpacity 
+              style={currentStyles.modalCloseButton}
+              onPress={() => setShowAddTag(false)}
+            >
+              <Text style={currentStyles.modalCloseButtonText}>Fermer</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </ScrollView>
+  );
+}
+
+const styles = (theme: any) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.background,
+  },
+  content: {
+    padding: 20,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 20,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  editIconButton: {
+    padding: 5,
+  },
+  editIcon: {
+    fontSize: 24,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: theme.text.primary,
+    flex: 1,
+    paddingRight: 10,
+    fontFamily: 'serif',
+  },
+  editTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: theme.text.primary,
+    marginBottom: 20,
+    fontFamily: 'serif',
+  },
+  favoriteIcon: {
+    fontSize: 32,
+  },
+  section: {
+    marginBottom: 25,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: theme.text.primary,
+  },
+  addTagButton: {
+    backgroundColor: theme.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  addTagButtonText: {
+    color: theme.button.text,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  emptyTagButton: {
+    backgroundColor: theme.card.background,
+    padding: 15,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.card.border,
+    borderStyle: 'dashed',
+  },
+  emptyTagButtonText: {
+    color: theme.text.secondary,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  infoText: {
+    fontSize: 16,
+    color: theme.text.secondary,
+  },
+  bookLink: {
+    backgroundColor: theme.card.background,
+    padding: 15,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: theme.card.border,
+  },
+  bookLinkText: {
+    fontSize: 16,
+    color: theme.text.primary,
+    fontWeight: '500',
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  tag: {
+    backgroundColor: theme.tag.background,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+  tagText: {
+    fontSize: 14,
+    color: theme.tag.text,
+  },
+  editTag: {
+    backgroundColor: theme.primary,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+  editTagText: {
+    color: theme.button.text,
+    fontSize: 14,
+  },
+  notes: {
+    fontSize: 16,
+    color: theme.text.primary,
+    lineHeight: 24,
+    backgroundColor: theme.card.background,
+    padding: 15,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: theme.card.border,
+  },
+  deleteButton: {
+    backgroundColor: theme.error,
+    padding: 18,
+    borderRadius: 16,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: theme.text.primary,
+    marginBottom: 8,
+    marginTop: 15,
+  },
+  input: {
+    backgroundColor: theme.surface,
+    padding: 15,
+    borderRadius: 12,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: theme.card.border,
+    color: theme.text.primary,
+  },
+  textArea: {
+    minHeight: 120,
+  },
+  suggestions: {
+    backgroundColor: theme.surface,
+    borderRadius: 12,
+    marginTop: 5,
+    borderWidth: 1,
+    borderColor: theme.card.border,
+  },
+  suggestion: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.divider,
+  },
+  suggestionText: {
+    fontSize: 14,
+    color: theme.text.primary,
+  },
+  editButtons: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 30,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: theme.card.background,
+    padding: 18,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.card.border,
+  },
+  cancelButtonText: {
+    color: theme.text.primary,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  saveEditButton: {
+    flex: 1,
+    backgroundColor: theme.primary,
+    padding: 18,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  saveEditButtonText: {
+    color: theme.button.text,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: theme.text.tertiary,
+    fontStyle: 'italic',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: theme.surface,
+    borderRadius: 16,
+    padding: 20,
+    width: '100%',
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: theme.text.primary,
+    marginBottom: 15,
+  },
+  quickTagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 20,
+  },
+  quickTag: {
+    backgroundColor: theme.tag.background,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: theme.card.border,
+  },
+  quickTagText: {
+    fontSize: 14,
+    color: theme.tag.text,
+    fontWeight: '500',
+  },
+  modalCloseButton: {
+    backgroundColor: theme.card.background,
+    padding: 15,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.card.border,
+  },
+  modalCloseButtonText: {
+    color: theme.text.primary,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});
