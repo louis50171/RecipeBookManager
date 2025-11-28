@@ -2,12 +2,13 @@
 import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Image } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useApp } from '../contexts/AppContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { Book } from '../models/types';
 
-type BooksScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Books'>;
+type BooksScreenNavigationProp = DrawerNavigationProp<any> & NativeStackNavigationProp<RootStackParamList, 'Books'>;
 
 interface Props {
   navigation: BooksScreenNavigationProp;
@@ -35,12 +36,25 @@ export default function BooksScreen({ navigation }: Props) {
       borderBottomWidth: 1,
       borderBottomColor: theme.card.border,
     },
+    headerTop: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 5,
+    },
+    menuButton: {
+      padding: 8,
+      marginRight: 12,
+    },
+    menuIcon: {
+      fontSize: 24,
+    },
     headerTitle: {
       fontSize: 28,
       fontWeight: 'bold',
       color: theme.text.primary,
-      marginBottom: 5,
       fontFamily: 'serif',
+      flex: 1,
     },
     bookCount: {
       fontSize: 14,
@@ -174,7 +188,15 @@ export default function BooksScreen({ navigation }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Ma Bibliothèque</Text>
+        <View style={styles.headerTop}>
+          <TouchableOpacity
+            style={styles.menuButton}
+            onPress={() => navigation.openDrawer()}
+          >
+            <Text style={styles.menuIcon}>☰</Text>
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Ma Bibliothèque</Text>
+        </View>
         <Text style={styles.bookCount}>{books.length} livre{books.length > 1 ? 's' : ''}</Text>
       </View>
 

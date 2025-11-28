@@ -2,12 +2,13 @@
 import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useApp } from '../contexts/AppContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { Recipe } from '../models/types';
 
-type RecipesScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Recipes'>;
+type RecipesScreenNavigationProp = DrawerNavigationProp<any> & NativeStackNavigationProp<RootStackParamList, 'Recipes'>;
 
 interface Props {
   navigation: RecipesScreenNavigationProp;
@@ -38,6 +39,29 @@ export default function RecipesScreen({ navigation }: Props) {
     container: {
       flex: 1,
       backgroundColor: theme.background,
+    },
+    header: {
+      backgroundColor: theme.surface,
+      padding: 20,
+      paddingTop: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.card.border,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    menuButton: {
+      padding: 8,
+      marginRight: 12,
+    },
+    menuIcon: {
+      fontSize: 24,
+    },
+    headerTitle: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      color: theme.text.primary,
+      fontFamily: 'serif',
+      flex: 1,
     },
     searchInput: {
       backgroundColor: theme.surface,
@@ -179,6 +203,16 @@ export default function RecipesScreen({ navigation }: Props) {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.menuButton}
+          onPress={() => navigation.openDrawer()}
+        >
+          <Text style={styles.menuIcon}>☰</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Mes Recettes</Text>
+      </View>
+
       <TextInput
         style={styles.searchInput}
         placeholder="Rechercher par nom ou tag..."
