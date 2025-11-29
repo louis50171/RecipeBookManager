@@ -185,7 +185,7 @@ export default function HomeScreen({ navigation }: Props) {
           <TouchableOpacity style={styles.menuButton} onPress={() => navigation.openDrawer()}>
             <Text style={styles.menuIcon}>☰</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>Gestionnaire de recette</Text>
+          <Text style={styles.title}>Liste de recette</Text>
         </View>
         <TouchableOpacity style={styles.themeButton} onPress={toggleTheme}>
           <Text style={styles.themeButtonText}>{isDark ? '☀️' : '🌙'}</Text>
