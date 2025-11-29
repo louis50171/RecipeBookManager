@@ -21,6 +21,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { DrawerContentScrollView, DrawerContentComponentProps } from '@react-navigation/drawer';
 import { useTheme } from '../contexts/ThemeContext';
 import { useApp } from '../contexts/AppContext';
+import { spacing, fontSizes, iconSizes } from '../theme/responsive';
 
 /**
  * Composant du contenu personnalisé du drawer
@@ -42,31 +43,31 @@ export default function DrawerContent(props: DrawerContentComponentProps) {
       backgroundColor: theme.background,
     },
     header: {
-      padding: 20,
+      padding: spacing.base,
       borderBottomWidth: 1,
       borderBottomColor: theme.card.border,
       backgroundColor: theme.surface,
     },
     headerTitle: {
-      fontSize: 24,
+      fontSize: fontSizes.xxl,
       fontWeight: 'bold',
       color: theme.text.primary,
       fontFamily: 'serif',
     },
     headerSubtitle: {
-      fontSize: 14,
+      fontSize: fontSizes.base,
       color: theme.text.secondary,
-      marginTop: 4,
+      marginTop: spacing.xs,
     },
     menuSection: {
-      paddingVertical: 10,
+      paddingVertical: spacing.sm,
     },
     menuItem: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 15,
-      paddingHorizontal: 20,
-      gap: 15,
+      paddingVertical: spacing.base,
+      paddingHorizontal: spacing.base,
+      gap: spacing.base,
     },
     menuItemActive: {
       backgroundColor: theme.primary + '20',
@@ -74,27 +75,27 @@ export default function DrawerContent(props: DrawerContentComponentProps) {
       borderRightColor: theme.primary,
     },
     menuIcon: {
-      fontSize: 24,
-      width: 30,
+      fontSize: iconSizes.base,
+      width: iconSizes.lg,
     },
     menuTextContainer: {
       flex: 1,
     },
     menuTitle: {
-      fontSize: 16,
+      fontSize: fontSizes.md,
       fontWeight: '600',
       color: theme.text.primary,
     },
     menuSubtitle: {
-      fontSize: 12,
+      fontSize: fontSizes.sm,
       color: theme.text.secondary,
-      marginTop: 2,
+      marginTop: spacing.xs,
     },
     divider: {
       height: 1,
       backgroundColor: theme.card.border,
-      marginVertical: 10,
-      marginHorizontal: 20,
+      marginVertical: spacing.sm,
+      marginHorizontal: spacing.base,
     },
   });
 

@@ -24,6 +24,7 @@ import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useApp } from '../contexts/AppContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { spacing, fontSizes, borderRadius, iconSizes, screenDimensions } from '../theme/responsive';
 
 type BookDetailScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'BookDetail'>;
 type BookDetailScreenRouteProp = RouteProp<RootStackParamList, 'BookDetail'>;
@@ -139,17 +140,17 @@ const styles = (theme: any) => StyleSheet.create({
     backgroundColor: theme.background,
   },
   content: {
-    padding: 20,
+    padding: spacing.base,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: spacing.base,
   },
   coverImage: {
     width: 150,
     height: 215,
-    borderRadius: 12,
-    marginBottom: 15,
+    borderRadius: borderRadius.md,
+    marginBottom: spacing.base,
   },
   placeholderCover: {
     width: 150,
@@ -157,62 +158,62 @@ const styles = (theme: any) => StyleSheet.create({
     backgroundColor: theme.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 15,
+    padding: spacing.base,
+    borderRadius: borderRadius.md,
+    marginBottom: spacing.base,
   },
   placeholderIcon: {
     fontSize: 48,
-    marginBottom: 10,
+    marginBottom: spacing.sm,
   },
   placeholderTitle: {
     color: theme.button.text,
-    fontSize: 14,
+    fontSize: fontSizes.base,
     fontWeight: '600',
     textAlign: 'center',
   },
   editButton: {
     backgroundColor: theme.primary,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 12,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
   },
   editButtonText: {
     color: theme.button.text,
-    fontSize: 14,
+    fontSize: fontSizes.base,
     fontWeight: '600',
   },
   title: {
-    fontSize: 24,
+    fontSize: fontSizes.xxl,
     fontWeight: 'bold',
     color: theme.text.primary,
-    marginBottom: 10,
+    marginBottom: spacing.sm,
     fontFamily: 'serif',
   },
   author: {
-    fontSize: 18,
+    fontSize: fontSizes.lg,
     color: theme.text.secondary,
-    marginBottom: 20,
+    marginBottom: spacing.base,
   },
   info: {
-    fontSize: 14,
+    fontSize: fontSizes.base,
     color: theme.text.secondary,
-    marginBottom: 5,
+    marginBottom: spacing.xs,
   },
   section: {
-    marginTop: 30,
+    marginTop: spacing.xxl,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: fontSizes.lg,
     fontWeight: '600',
     color: theme.text.primary,
-    marginBottom: 15,
+    marginBottom: spacing.base,
   },
   recipeCard: {
     backgroundColor: theme.card.background,
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 10,
+    padding: spacing.base,
+    borderRadius: borderRadius.md,
+    marginBottom: spacing.sm,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -220,11 +221,11 @@ const styles = (theme: any) => StyleSheet.create({
     borderColor: theme.card.border,
   },
   recipeName: {
-    fontSize: 16,
+    fontSize: fontSizes.md,
     color: theme.text.primary,
   },
   favorite: {
-    fontSize: 20,
+    fontSize: iconSizes.lg,
   },
   emptyText: {
     textAlign: 'center',
@@ -233,14 +234,14 @@ const styles = (theme: any) => StyleSheet.create({
   },
   deleteButton: {
     backgroundColor: theme.error,
-    padding: 18,
-    borderRadius: 16,
+    padding: spacing.lg,
+    borderRadius: borderRadius.base,
     alignItems: 'center',
-    marginTop: 30,
+    marginTop: spacing.xxl,
   },
   deleteButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: fontSizes.md,
     fontWeight: '600',
   },
 });

@@ -32,6 +32,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { useApp } from '../contexts/AppContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { Recipe } from '../models/types';
+import { spacing, fontSizes, borderRadius } from '../theme/responsive';
 
 type AddRecipeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'AddRecipe'>;
 
@@ -93,20 +94,20 @@ export default function AddRecipeScreen({ navigation }: Props) {
       backgroundColor: theme.background,
     },
     form: {
-      padding: 20,
+      padding: spacing.base,
     },
     label: {
-      fontSize: 16,
+      fontSize: fontSizes.md,
       fontWeight: '600',
       color: theme.text.primary,
-      marginBottom: 8,
-      marginTop: 15,
+      marginBottom: spacing.xs,
+      marginTop: spacing.base,
     },
     input: {
       backgroundColor: theme.surface,
-      padding: 15,
-      borderRadius: 12,
-      fontSize: 16,
+      padding: spacing.base,
+      borderRadius: borderRadius.md,
+      fontSize: fontSizes.md,
       borderWidth: 1,
       borderColor: theme.card.border,
       color: theme.text.primary,
@@ -116,8 +117,8 @@ export default function AddRecipeScreen({ navigation }: Props) {
     },
     combobox: {
       backgroundColor: theme.surface,
-      padding: 15,
-      borderRadius: 12,
+      padding: spacing.base,
+      borderRadius: borderRadius.md,
       borderWidth: 1,
       borderColor: theme.card.border,
       flexDirection: 'row',
@@ -125,7 +126,7 @@ export default function AddRecipeScreen({ navigation }: Props) {
       alignItems: 'center',
     },
     comboboxText: {
-      fontSize: 16,
+      fontSize: fontSizes.md,
       color: theme.text.primary,
       flex: 1,
     },
@@ -133,20 +134,20 @@ export default function AddRecipeScreen({ navigation }: Props) {
       color: theme.text.tertiary,
     },
     comboboxArrow: {
-      fontSize: 12,
+      fontSize: fontSizes.xs,
       color: theme.text.secondary,
-      marginLeft: 10,
+      marginLeft: spacing.sm,
     },
     bookPickerContainer: {
       backgroundColor: theme.surface,
-      borderRadius: 12,
-      marginTop: 5,
+      borderRadius: borderRadius.md,
+      marginTop: spacing.xs,
       maxHeight: 250,
       borderWidth: 1,
       borderColor: theme.card.border,
     },
     bookPickerOption: {
-      padding: 15,
+      padding: spacing.base,
       borderBottomWidth: 1,
       borderBottomColor: theme.divider,
     },
@@ -154,57 +155,57 @@ export default function AddRecipeScreen({ navigation }: Props) {
       backgroundColor: theme.card.background,
     },
     bookPickerOptionText: {
-      fontSize: 16,
+      fontSize: fontSizes.md,
       color: theme.text.primary,
       fontWeight: '500',
     },
     bookPickerOptionAuthor: {
-      fontSize: 13,
+      fontSize: fontSizes.sm,
       color: theme.text.secondary,
-      marginTop: 2,
+      marginTop: spacing.xs,
     },
     tagsContainer: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: 8,
-      marginBottom: 10,
+      gap: spacing.sm,
+      marginBottom: spacing.sm,
     },
     selectedTag: {
       backgroundColor: theme.primary,
-      paddingHorizontal: 15,
-      paddingVertical: 8,
-      borderRadius: 12,
+      paddingHorizontal: spacing.base,
+      paddingVertical: spacing.sm,
+      borderRadius: borderRadius.md,
     },
     selectedTagText: {
       color: theme.button.text,
-      fontSize: 14,
+      fontSize: fontSizes.base,
     },
     suggestions: {
       backgroundColor: theme.surface,
-      borderRadius: 12,
-      marginTop: 5,
+      borderRadius: borderRadius.md,
+      marginTop: spacing.xs,
       borderWidth: 1,
       borderColor: theme.card.border,
     },
     suggestion: {
-      padding: 12,
+      padding: spacing.md,
       borderBottomWidth: 1,
       borderBottomColor: theme.divider,
     },
     suggestionText: {
-      fontSize: 14,
+      fontSize: fontSizes.base,
       color: theme.text.primary,
     },
     saveButton: {
       backgroundColor: theme.primary,
-      padding: 18,
-      borderRadius: 16,
+      padding: spacing.lg,
+      borderRadius: borderRadius.base,
       alignItems: 'center',
-      marginTop: 30,
+      marginTop: spacing.xxl,
     },
     saveButtonText: {
       color: theme.button.text,
-      fontSize: 16,
+      fontSize: fontSizes.md,
       fontWeight: '600',
     },
   });

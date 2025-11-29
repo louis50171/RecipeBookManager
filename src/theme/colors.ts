@@ -9,7 +9,12 @@
  *
  * Les thèmes suivent une palette de couleurs cohérente inspirée de l'univers culinaire
  * avec des tons chauds (orange/corail) comme couleur principale.
+ *
+ * Chaque thème inclut maintenant des valeurs responsive pour les espacements,
+ * tailles de police et bordures, optimisés pour tous les types d'écrans mobiles.
  */
+
+import { spacing, fontSizes, borderRadius, iconSizes } from './responsive';
 
 /**
  * Thème clair de l'application
@@ -158,3 +163,21 @@ export const darkTheme = {
  * et facilite le typage dans le reste de l'application.
  */
 export type Theme = typeof lightTheme;
+
+/**
+ * Valeurs responsive communes aux deux thèmes
+ * Optimisées pour tous les types d'écrans mobiles
+ */
+export const responsiveTheme = {
+  /** Espacements responsive pour marges et paddings */
+  spacing,
+
+  /** Tailles de police responsive */
+  fontSizes,
+
+  /** Tailles de border radius responsive */
+  borderRadius,
+
+  /** Tailles d'icônes responsive */
+  iconSizes,
+};
