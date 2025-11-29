@@ -1,4 +1,31 @@
-// src/screens/RecipeDetailScreen.tsx
+/**
+ * src/screens/RecipeDetailScreen.tsx
+ *
+ * Écran de détail et d'édition d'une recette.
+ *
+ * Fonctionnalités :
+ * - Affichage complet de la recette (nom, livre source, tags, notes)
+ * - Mode édition in-place pour modifier nom, tags et notes
+ * - Toggle favori avec étoile interactive
+ * - Ajout/suppression de tags avec suggestions
+ * - Navigation vers le livre source si disponible
+ * - Suppression de la recette avec confirmation
+ * - Sauvegarde automatique des modifications
+ *
+ * Mode édition :
+ * - Activation via bouton "Modifier"
+ * - Champs éditables : nom, notes
+ * - Gestion des tags : ajout via suggestions ou création libre, suppression
+ * - Modal de sélection de tags depuis la liste globale
+ * - Boutons Annuler/Enregistrer
+ *
+ * Design :
+ * - Header avec titre et étoile de favori
+ * - Cartes d'information (livre source, tags, notes)
+ * - Mode édition avec champs de saisie in-place
+ * - Suggestions de tags en temps réel
+ */
+
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, TextInput, Modal } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -245,8 +272,8 @@ export default function RecipeDetailScreen({ navigation, route }: Props) {
               </TouchableOpacity>
             </View>
             <View style={currentStyles.tagsContainer}>
-              {recipe.tags.map((tag, index) => (
-                <View key={index} style={currentStyles.tag}>
+              {recipe.tags.map((tag) => (
+                <View key={tag} style={currentStyles.tag}>
                   <Text style={currentStyles.tagText}>{tag}</Text>
                 </View>
               ))}

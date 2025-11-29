@@ -1,4 +1,25 @@
-// src/screens/RecipesScreen.tsx
+/**
+ * src/screens/RecipesScreen.tsx
+ *
+ * Écran d'affichage de la liste des recettes.
+ *
+ * Fonctionnalités :
+ * - Liste complète de toutes les recettes
+ * - Recherche par nom de recette ou tags
+ * - Filtre pour afficher uniquement les favoris
+ * - Toggle favori directement depuis la liste (étoile)
+ * - Affichage du livre source de chaque recette
+ * - Aperçu des tags (3 premiers + compteur)
+ * - Navigation vers le détail au clic
+ * - Bouton d'ajout de nouvelle recette
+ *
+ * Design :
+ * - Cartes avec nom, livre source et tags
+ * - Icône étoile interactive pour les favoris
+ * - Bouton de filtre toggle (toutes/favoris)
+ * - Recherche en temps réel
+ */
+
 import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -17,18 +38,27 @@ interface Props {
 export default function RecipesScreen({ navigation }: Props) {
   const { recipes, books, toggleFavorite } = useApp();
   const { theme } = useTheme();
+
+  /** État de la recherche */
   const [searchQuery, setSearchQuery] = useState('');
+
+  /** État du filtre favoris */
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
+  /** Filtre les recettes selon la recherche et le filtre favoris */
   const filteredRecipes = recipes.filter(recipe => {
     const matchesSearch = recipe.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       recipe.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    
+
     const matchesFavorites = !showFavoritesOnly || recipe.isFavorite;
-    
+
     return matchesSearch && matchesFavorites;
   });
 
+  /**
+   * Retourne le titre du livre source d'une recette
+   * @param bookId - ID du livre ou undefined pour recettes personnelles
+   */
   const getBookTitle = (bookId?: string) => {
     if (!bookId) return 'Recette personnelle';
     const book = books.find(b => b.id === bookId);
@@ -187,8 +217,8 @@ export default function RecipesScreen({ navigation }: Props) {
         <Text style={styles.bookSource}>{getBookTitle(item.bookId)}</Text>
         {item.tags.length > 0 && (
           <View style={styles.tagsContainer}>
-            {item.tags.slice(0, 3).map((tag, index) => (
-              <View key={index} style={styles.tag}>
+            {item.tags.slice(0, 3).map((tag) => (
+              <View key={tag} style={styles.tag}>
                 <Text style={styles.tagText}>{tag}</Text>
               </View>
             ))}

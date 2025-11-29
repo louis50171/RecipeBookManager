@@ -1,4 +1,30 @@
-// src/screens/AddRecipeScreen.tsx
+/**
+ * src/screens/AddRecipeScreen.tsx
+ *
+ * Écran d'ajout d'une nouvelle recette.
+ *
+ * Fonctionnalités :
+ * - Formulaire de création de recette
+ * - Champs : nom (obligatoire), livre source (optionnel), tags, notes
+ * - Sélection du livre source depuis la liste des livres
+ * - Ajout de tags via suggestions ou saisie libre
+ * - Validation du nom avant sauvegarde
+ * - Génération automatique d'ID et de date de création
+ * - Navigation automatique vers les recettes après sauvegarde
+ *
+ * Gestion des tags :
+ * - Affichage des tags disponibles filtrés par la saisie
+ * - Ajout en cliquant sur une suggestion ou en validant la saisie
+ * - Suppression des tags sélectionnés
+ * - Création automatique de nouveaux tags via l'AppContext
+ *
+ * Design :
+ * - Formulaire avec sections organisées
+ * - Sélecteur de livre avec modal
+ * - Tags affichés en chips colorées
+ * - Boutons d'action en bas (Annuler/Enregistrer)
+ */
+
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';

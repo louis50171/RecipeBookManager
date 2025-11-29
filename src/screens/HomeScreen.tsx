@@ -1,4 +1,26 @@
-// src/screens/HomeScreen.tsx
+/**
+ * src/screens/HomeScreen.tsx
+ *
+ * Écran d'accueil de l'application - Dashboard principal.
+ *
+ * Cet écran présente une vue d'ensemble de l'application avec :
+ * - En-tête avec bouton menu et bouton de changement de thème
+ * - Carte d'information présentant l'application
+ * - Statistiques en temps réel (nombre de livres, recettes, favoris)
+ * - Cartes de navigation vers les sections principales
+ *
+ * Fonctionnalités :
+ * - Bouton menu (burger) : ouvre le drawer de navigation
+ * - Bouton thème : bascule entre mode clair et sombre
+ * - Statistiques dynamiques mises à jour en temps réel
+ * - Navigation rapide vers Livres et Recettes
+ *
+ * Design :
+ * - Interface claire et épurée type "Today" (inspiré des apps modernes)
+ * - Cartes avec bordures et arrière-plans thématiques
+ * - Disposition responsive et espacements harmonieux
+ */
+
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -7,16 +29,28 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { useApp } from '../contexts/AppContext';
 import { useTheme } from '../contexts/ThemeContext';
 
+/** Type combiné pour la navigation (drawer + stack) */
 type HomeScreenNavigationProp = DrawerNavigationProp<any> & NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
+/** Props du composant HomeScreen */
 interface Props {
   navigation: HomeScreenNavigationProp;
 }
 
+/**
+ * Composant de l'écran d'accueil
+ *
+ * @param navigation - Props de navigation pour le drawer et la stack
+ * @returns {JSX.Element} L'écran d'accueil complet
+ */
 export default function HomeScreen({ navigation }: Props) {
+  /** Récupère les données de l'application */
   const { books, recipes } = useApp();
+
+  /** Récupère le thème et la fonction de bascule */
   const { theme, isDark, toggleTheme } = useTheme();
-  
+
+  /** Calcule le nombre de recettes favorites pour les statistiques */
   const favoriteRecipes = recipes.filter(r => r.isFavorite);
 
   const styles = StyleSheet.create({
@@ -151,7 +185,7 @@ export default function HomeScreen({ navigation }: Props) {
           <TouchableOpacity style={styles.menuButton} onPress={() => navigation.openDrawer()}>
             <Text style={styles.menuIcon}>☰</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>Today</Text>
+          <Text style={styles.title}>Gestionnaire de recette</Text>
         </View>
         <TouchableOpacity style={styles.themeButton} onPress={toggleTheme}>
           <Text style={styles.themeButtonText}>{isDark ? '☀️' : '🌙'}</Text>

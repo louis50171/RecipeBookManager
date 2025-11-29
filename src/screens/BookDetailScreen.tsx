@@ -1,4 +1,22 @@
-// src/screens/BookDetailScreen.tsx
+/**
+ * src/screens/BookDetailScreen.tsx
+ *
+ * Écran de détail d'un livre de recettes.
+ *
+ * Fonctionnalités :
+ * - Affichage complet des informations du livre (titre, auteur, éditeur, année, catégorie, couverture)
+ * - Liste des recettes associées à ce livre avec navigation vers le détail
+ * - Bouton de modification du livre
+ * - Bouton de suppression avec confirmation
+ * - Gestion du cas "livre non trouvé"
+ *
+ * Design :
+ * - Image de couverture en grand format en haut
+ * - Informations organisées en cartes
+ * - Liste des recettes liées avec compteur
+ * - Boutons d'action colorés en bas
+ */
+
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, Image } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -19,8 +37,11 @@ export default function BookDetailScreen({ navigation, route }: Props) {
   const { bookId } = route.params;
   const { books, recipes, deleteBook } = useApp();
   const { theme } = useTheme();
-  
+
+  /** Recherche le livre par son ID */
   const book = books.find(b => b.id === bookId);
+
+  /** Récupère toutes les recettes associées à ce livre */
   const bookRecipes = recipes.filter(r => r.bookId === bookId);
 
   if (!book) {

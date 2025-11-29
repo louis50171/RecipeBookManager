@@ -1,21 +1,90 @@
-// src/models/types.ts
+/**
+ * src/models/types.ts
+ *
+ * Définitions des types TypeScript pour les modèles de données de l'application.
+ *
+ * Ce fichier centralise toutes les interfaces qui représentent les entités
+ * métier de l'application : livres de recettes et recettes culinaires.
+ */
+
+/**
+ * Interface représentant un livre de recettes
+ *
+ * Un livre de recettes contient des informations bibliographiques
+ * et peut être associé à plusieurs recettes.
+ *
+ * @interface Book
+ */
 export interface Book {
+  /** Identifiant unique du livre (UUID généré à la création) */
   id: string;
+
+  /** Titre du livre de recettes */
   title: string;
+
+  /** Nom de l'auteur du livre */
   author: string;
+
+  /** Nom de la maison d'édition (optionnel) */
   editor?: string;
+
+  /** Année de publication du livre (optionnel) */
   year?: number;
-  coverImage?: string; // URL de l'image de couverture
+
+  /**
+   * URL ou chemin vers l'image de couverture du livre (optionnel)
+   * Peut être une URI locale (ex: file://) ou une URL distante
+   */
+  coverImage?: string;
+
+  /** Catégorie ou genre du livre (ex: "Cuisine française", "Pâtisserie") (optionnel) */
   category?: string;
+
+  /** Date de création de l'entrée au format ISO 8601 */
   createdAt: string;
 }
 
+/**
+ * Interface représentant une recette culinaire
+ *
+ * Une recette peut être associée à un livre ou être indépendante.
+ * Elle contient des tags pour faciliter la recherche et le filtrage,
+ * et peut être marquée comme favorite.
+ *
+ * @interface Recipe
+ */
 export interface Recipe {
+  /** Identifiant unique de la recette (UUID généré à la création) */
   id: string;
+
+  /** Nom de la recette */
   name: string;
-  bookId?: string; // Optionnel, peut être null si recette sans livre
+
+  /**
+   * Identifiant du livre auquel appartient cette recette (optionnel)
+   * Si non défini, la recette est considérée comme indépendante (sans livre)
+   */
+  bookId?: string;
+
+  /**
+   * Liste de tags associés à la recette pour faciliter la recherche et le filtrage
+   * Exemples de tags : saisons (printemps, été), types (entrée, plat, dessert),
+   * régimes alimentaires (végétarien, sans gluten), difficulté (rapide, difficile)
+   */
   tags: string[];
+
+  /**
+   * Notes personnelles sur la recette
+   * Peut contenir des modifications, des astuces, des commentaires, etc.
+   */
   notes: string;
+
+  /**
+   * Indicateur de favori
+   * true si la recette est marquée comme favorite, false sinon
+   */
   isFavorite: boolean;
+
+  /** Date de création de l'entrée au format ISO 8601 */
   createdAt: string;
 }

@@ -1,4 +1,31 @@
-// src/screens/AddBookScreen.tsx
+/**
+ * src/screens/AddBookScreen.tsx
+ *
+ * Écran d'ajout ou de modification d'un livre de recettes.
+ *
+ * Fonctionnalités principales :
+ * - Mode ajout ou édition selon les paramètres de route
+ * - Recherche de livre via :
+ *   * Scan de code-barres ISBN avec caméra
+ *   * Recherche par titre
+ *   * Recherche par auteur
+ * - API Google Books pour récupérer automatiquement les informations
+ * - Saisie manuelle de tous les champs (titre, auteur, éditeur, année, catégorie)
+ * - Upload ou prise de photo pour la couverture
+ * - Validation des données avant sauvegarde
+ *
+ * Technologies :
+ * - expo-camera pour le scan de codes-barres
+ * - expo-image-picker pour sélectionner/prendre des photos
+ * - Google Books API pour la recherche de livres
+ *
+ * Design :
+ * - Onglets de recherche (ISBN/Titre/Auteur)
+ * - Résultats de recherche en cartes cliquables
+ * - Formulaire avec tous les champs éditables
+ * - Prévisualisation de l'image de couverture
+ */
+
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, ActivityIndicator, FlatList, Image, Modal } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';

@@ -1,4 +1,23 @@
-// src/screens/BooksScreen.tsx
+/**
+ * src/screens/BooksScreen.tsx
+ *
+ * Écran d'affichage de la bibliothèque de livres de recettes.
+ *
+ * Fonctionnalités :
+ * - Affichage en grille (2 colonnes) de tous les livres
+ * - Barre de recherche pour filtrer par titre ou auteur
+ * - Affichage des couvertures d'image ou placeholder stylisé
+ * - Navigation vers le détail d'un livre au clic
+ * - Bouton d'ajout de nouveau livre
+ * - Vue vide avec message encourageant si aucun livre
+ *
+ * Design :
+ * - Cartes en format portrait (ratio 0.7) comme de vrais livres
+ * - Images de couverture ou fond coloré avec titre si pas d'image
+ * - En-tête avec menu burger et compteur de livres
+ * - Recherche en temps réel
+ */
+
 import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Image } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -17,8 +36,11 @@ interface Props {
 export default function BooksScreen({ navigation }: Props) {
   const { books } = useApp();
   const { theme } = useTheme();
+
+  /** État de la recherche */
   const [searchQuery, setSearchQuery] = useState('');
 
+  /** Filtre les livres selon la recherche (titre ou auteur) */
   const filteredBooks = books.filter(book =>
     book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     book.author.toLowerCase().includes(searchQuery.toLowerCase())

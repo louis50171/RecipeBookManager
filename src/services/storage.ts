@@ -1,14 +1,57 @@
-// src/services/storage.ts
+/**
+ * src/services/storage.ts
+ *
+ * Service de gestion de la persistance des données de l'application.
+ *
+ * Ce module fournit toutes les fonctions nécessaires pour interagir avec
+ * le stockage local (AsyncStorage) de React Native. Il gère la sauvegarde,
+ * la récupération, la mise à jour et la suppression des livres, recettes et tags.
+ *
+ * Architecture :
+ * - Utilise AsyncStorage pour un stockage persistant et asynchrone
+ * - Stocke les données au format JSON
+ * - Gère les erreurs de manière gracieuse avec des valeurs par défaut
+ * - Toutes les fonctions sont asynchrones et retournent des Promises
+ *
+ * Clés de stockage :
+ * - @storage/books : liste de tous les livres
+ * - @storage/recipes : liste de toutes les recettes
+ * - @storage/tags : liste de tous les tags personnalisés
+ */
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Book, Recipe } from '../models/types';
 
+/**
+ * Clés utilisées pour le stockage dans AsyncStorage
+ *
+ * Ces clés sont préfixées par @storage/ pour éviter les conflits
+ * avec d'autres données potentiellement stockées dans AsyncStorage.
+ */
 const KEYS = {
+  /** Clé pour la liste des livres */
   BOOKS: '@storage/books',
+  /** Clé pour la liste des recettes */
   RECIPES: '@storage/recipes',
+  /** Clé pour la liste des tags */
   TAGS: '@storage/tags',
 };
 
-// Books
+/**
+ * ============================================================================
+ * FONCTIONS DE GESTION DES LIVRES
+ * ============================================================================
+ */
+
+/**
+ * Récupère la liste de tous les livres depuis le stockage
+ *
+ * @returns {Promise<Book[]>} Tableau de tous les livres stockés, ou tableau vide si erreur
+ *
+ * @example
+ * const books = await getBooks();
+ * console.log(`Vous avez ${books.length} livres`);
+ */
 export const getBooks = async (): Promise<Book[]> => {
   try {
     const data = await AsyncStorage.getItem(KEYS.BOOKS);
@@ -19,6 +62,24 @@ export const getBooks = async (): Promise<Book[]> => {
   }
 };
 
+/**
+ * Sauvegarde un nouveau livre dans le stockage
+ *
+ * Ajoute le livre à la fin de la liste existante sans vérifier
+ * les doublons (l'ID unique doit être géré en amont).
+ *
+ * @param {Book} book - Le livre à sauvegarder
+ * @returns {Promise<void>}
+ *
+ * @example
+ * const newBook = {
+ *   id: 'uuid-123',
+ *   title: 'La cuisine française',
+ *   author: 'Jean Dupont',
+ *   createdAt: new Date().toISOString()
+ * };
+ * await saveBook(newBook);
+ */
 export const saveBook = async (book: Book): Promise<void> => {
   try {
     const books = await getBooks();
@@ -29,6 +90,22 @@ export const saveBook = async (book: Book): Promise<void> => {
   }
 };
 
+/**
+ * Met à jour un livre existant dans le stockage
+ *
+ * Recherche le livre par son ID et remplace ses données par les nouvelles.
+ * Si le livre n'existe pas, aucune modification n'est effectuée.
+ *
+ * @param {Book} book - Le livre avec les données mises à jour (doit contenir l'ID existant)
+ * @returns {Promise<void>}
+ *
+ * @example
+ * const updatedBook = {
+ *   ...existingBook,
+ *   title: 'Nouveau titre'
+ * };
+ * await updateBook(updatedBook);
+ */
 export const updateBook = async (book: Book): Promise<void> => {
   try {
     const books = await getBooks();
@@ -39,6 +116,18 @@ export const updateBook = async (book: Book): Promise<void> => {
   }
 };
 
+/**
+ * Supprime un livre du stockage
+ *
+ * Retire le livre de la liste en se basant sur son ID.
+ * Note : Cette fonction ne supprime pas les recettes associées au livre.
+ *
+ * @param {string} bookId - L'identifiant unique du livre à supprimer
+ * @returns {Promise<void>}
+ *
+ * @example
+ * await deleteBook('uuid-123');
+ */
 export const deleteBook = async (bookId: string): Promise<void> => {
   try {
     const books = await getBooks();
@@ -49,7 +138,21 @@ export const deleteBook = async (bookId: string): Promise<void> => {
   }
 };
 
-// Recipes
+/**
+ * ============================================================================
+ * FONCTIONS DE GESTION DES RECETTES
+ * ============================================================================
+ */
+
+/**
+ * Récupère la liste de toutes les recettes depuis le stockage
+ *
+ * @returns {Promise<Recipe[]>} Tableau de toutes les recettes stockées, ou tableau vide si erreur
+ *
+ * @example
+ * const recipes = await getRecipes();
+ * const favorites = recipes.filter(r => r.isFavorite);
+ */
 export const getRecipes = async (): Promise<Recipe[]> => {
   try {
     const data = await AsyncStorage.getItem(KEYS.RECIPES);
@@ -60,6 +163,27 @@ export const getRecipes = async (): Promise<Recipe[]> => {
   }
 };
 
+/**
+ * Sauvegarde une nouvelle recette dans le stockage
+ *
+ * Ajoute la recette à la fin de la liste existante.
+ * L'ID unique doit être généré en amont.
+ *
+ * @param {Recipe} recipe - La recette à sauvegarder
+ * @returns {Promise<void>}
+ *
+ * @example
+ * const newRecipe = {
+ *   id: 'uuid-456',
+ *   name: 'Tarte aux pommes',
+ *   bookId: 'uuid-123',
+ *   tags: ['dessert', 'automne'],
+ *   notes: 'Délicieuse avec de la cannelle',
+ *   isFavorite: false,
+ *   createdAt: new Date().toISOString()
+ * };
+ * await saveRecipe(newRecipe);
+ */
 export const saveRecipe = async (recipe: Recipe): Promise<void> => {
   try {
     const recipes = await getRecipes();
@@ -70,6 +194,22 @@ export const saveRecipe = async (recipe: Recipe): Promise<void> => {
   }
 };
 
+/**
+ * Met à jour une recette existante dans le stockage
+ *
+ * Recherche la recette par son ID et remplace ses données.
+ * Utile pour modifier le nom, les tags, les notes, le statut favori, etc.
+ *
+ * @param {Recipe} recipe - La recette avec les données mises à jour
+ * @returns {Promise<void>}
+ *
+ * @example
+ * const updatedRecipe = {
+ *   ...existingRecipe,
+ *   tags: [...existingRecipe.tags, 'rapide']
+ * };
+ * await updateRecipe(updatedRecipe);
+ */
 export const updateRecipe = async (recipe: Recipe): Promise<void> => {
   try {
     const recipes = await getRecipes();
@@ -80,6 +220,17 @@ export const updateRecipe = async (recipe: Recipe): Promise<void> => {
   }
 };
 
+/**
+ * Supprime une recette du stockage
+ *
+ * Retire la recette de la liste en se basant sur son ID.
+ *
+ * @param {string} recipeId - L'identifiant unique de la recette à supprimer
+ * @returns {Promise<void>}
+ *
+ * @example
+ * await deleteRecipe('uuid-456');
+ */
 export const deleteRecipe = async (recipeId: string): Promise<void> => {
   try {
     const recipes = await getRecipes();
@@ -90,10 +241,23 @@ export const deleteRecipe = async (recipeId: string): Promise<void> => {
   }
 };
 
+/**
+ * Bascule le statut favori d'une recette
+ *
+ * Inverse la valeur du champ isFavorite pour la recette spécifiée.
+ * Si elle était favorite, elle ne l'est plus, et vice-versa.
+ *
+ * @param {string} recipeId - L'identifiant unique de la recette
+ * @returns {Promise<void>}
+ *
+ * @example
+ * // Marquer/démarquer comme favori
+ * await toggleFavorite('uuid-456');
+ */
 export const toggleFavorite = async (recipeId: string): Promise<void> => {
   try {
     const recipes = await getRecipes();
-    const updatedRecipes = recipes.map(r => 
+    const updatedRecipes = recipes.map(r =>
       r.id === recipeId ? { ...r, isFavorite: !r.isFavorite } : r
     );
     await AsyncStorage.setItem(KEYS.RECIPES, JSON.stringify(updatedRecipes));
@@ -102,7 +266,24 @@ export const toggleFavorite = async (recipeId: string): Promise<void> => {
   }
 };
 
-// Tags
+/**
+ * ============================================================================
+ * FONCTIONS DE GESTION DES TAGS
+ * ============================================================================
+ */
+
+/**
+ * Récupère la liste de tous les tags disponibles
+ *
+ * Si aucun tag personnalisé n'a été sauvegardé, retourne la liste des tags par défaut.
+ * Les tags servent à catégoriser et filtrer les recettes.
+ *
+ * @returns {Promise<string[]>} Tableau de tous les tags, ou tags par défaut si erreur/vide
+ *
+ * @example
+ * const tags = await getTags();
+ * // ['printemps', 'été', 'automne', 'hiver', 'végétarien', ...]
+ */
 export const getTags = async (): Promise<string[]> => {
   try {
     const data = await AsyncStorage.getItem(KEYS.TAGS);
@@ -113,6 +294,19 @@ export const getTags = async (): Promise<string[]> => {
   }
 };
 
+/**
+ * Ajoute un nouveau tag à la liste
+ *
+ * Vérifie que le tag n'existe pas déjà avant de l'ajouter (pas de doublons).
+ * Le tag est ajouté à la fin de la liste.
+ *
+ * @param {string} tag - Le nouveau tag à ajouter
+ * @returns {Promise<void>}
+ *
+ * @example
+ * await addTag('pâtisserie');
+ * await addTag('cuisine italienne');
+ */
 export const addTag = async (tag: string): Promise<void> => {
   try {
     const tags = await getTags();
@@ -125,6 +319,17 @@ export const addTag = async (tag: string): Promise<void> => {
   }
 };
 
+/**
+ * Retourne la liste des tags par défaut de l'application
+ *
+ * Ces tags couvrent les catégories principales :
+ * - Saisons : printemps, été, automne, hiver
+ * - Régimes alimentaires : végétarien, végétalien, sans gluten
+ * - Types de plats : entrée, plat, dessert
+ * - Niveau de difficulté : rapide, difficile
+ *
+ * @returns {string[]} Tableau des tags par défaut
+ */
 const getDefaultTags = (): string[] => {
   return [
     'printemps',

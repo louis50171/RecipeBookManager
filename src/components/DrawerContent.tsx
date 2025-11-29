@@ -1,14 +1,41 @@
-// src/components/DrawerContent.tsx
+/**
+ * src/components/DrawerContent.tsx
+ *
+ * Composant personnalisé pour le contenu du menu drawer (menu latéral).
+ *
+ * Ce composant affiche un menu de navigation élégant avec :
+ * - Un en-tête contenant le titre de l'application
+ * - Une liste d'items de menu avec icônes, titres et sous-titres dynamiques
+ * - Un indicateur visuel pour la route active
+ * - Des compteurs mis à jour en temps réel (nombre de livres et recettes)
+ *
+ * Design :
+ * - Adapté automatiquement au thème actif (clair/sombre)
+ * - Utilise des émojis comme icônes pour un rendu universel
+ * - Séparateurs entre les items pour une meilleure lisibilité
+ * - Mise en évidence de l'item actif avec bordure et fond coloré
+ */
+
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { DrawerContentScrollView, DrawerContentComponentProps } from '@react-navigation/drawer';
 import { useTheme } from '../contexts/ThemeContext';
 import { useApp } from '../contexts/AppContext';
 
+/**
+ * Composant du contenu personnalisé du drawer
+ *
+ * @param props - Props standard du drawer de React Navigation
+ * @returns {JSX.Element} Le contenu du menu drawer
+ */
 export default function DrawerContent(props: DrawerContentComponentProps) {
+  /** Récupère le thème actuel pour le styling */
   const { theme } = useTheme();
+
+  /** Récupère les données de l'application pour afficher les compteurs */
   const { books, recipes } = useApp();
 
+  /** Styles dynamiques basés sur le thème actuel */
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -71,6 +98,10 @@ export default function DrawerContent(props: DrawerContentComponentProps) {
     },
   });
 
+  /**
+   * Définition des items du menu
+   * Les sous-titres sont dynamiques et affichent le nombre d'éléments en temps réel
+   */
   const menuItems = [
     {
       name: 'Home',
@@ -92,6 +123,7 @@ export default function DrawerContent(props: DrawerContentComponentProps) {
     },
   ];
 
+  /** Détermine la route actuelle pour mettre en évidence l'item correspondant */
   const currentRoute = props.state.routeNames[props.state.index];
 
   return (
