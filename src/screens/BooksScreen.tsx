@@ -5,7 +5,7 @@
  *
  * Fonctionnalités :
  * - Affichage en grille (2 colonnes) de tous les livres
- * - Barre de recherche pour filtrer par titre ou auteur
+ * - Barre de recherche pour filtrer par titre, auteur ou catégorie
  * - Affichage des couvertures d'image ou placeholder stylisé
  * - Navigation vers le détail d'un livre au clic
  * - Bouton d'ajout de nouveau livre
@@ -41,10 +41,11 @@ export default function BooksScreen({ navigation }: Props) {
   /** État de la recherche */
   const [searchQuery, setSearchQuery] = useState('');
 
-  /** Filtre les livres selon la recherche (titre ou auteur) */
+  /** Filtre les livres selon la recherche (titre, auteur ou catégorie) */
   const filteredBooks = books.filter(book =>
     book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    book.author.toLowerCase().includes(searchQuery.toLowerCase())
+    book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (book.category && book.category.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const styles = StyleSheet.create({
@@ -225,7 +226,7 @@ export default function BooksScreen({ navigation }: Props) {
 
       <TextInput
         style={styles.searchInput}
-        placeholder="Rechercher un livre..."
+        placeholder="Rechercher un livre, une catégorie, auteur, ..."
         placeholderTextColor={theme.text.tertiary}
         value={searchQuery}
         onChangeText={setSearchQuery}
