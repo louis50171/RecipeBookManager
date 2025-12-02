@@ -47,7 +47,7 @@ interface Props {
  */
 export default function HomeScreen({ navigation }: Props) {
   /** Récupère les données de l'application */
-  const { books, recipes } = useApp();
+  const { books, recipes, collections } = useApp();
 
   /** Récupère le thème et la fonction de bascule */
   const { theme, isDark, toggleTheme } = useTheme();
@@ -259,6 +259,23 @@ export default function HomeScreen({ navigation }: Props) {
                 <Text style={styles.navTitle}>Mes Recettes</Text>
                 <Text style={styles.navSubtitle} numberOfLines={1}>
                   {recipes.length} recette{recipes.length > 1 ? 's' : ''} · {favoriteRecipes.length} favori{favoriteRecipes.length > 1 ? 's' : ''}
+                </Text>
+              </View>
+            </View>
+            <Text style={styles.navArrow}>›</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.navCard}
+            onPress={() => navigation.navigate('Collections')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.navCardContent}>
+              <Text style={styles.navIcon}>📂</Text>
+              <View style={styles.navTextContainer}>
+                <Text style={styles.navTitle}>Collections</Text>
+                <Text style={styles.navSubtitle} numberOfLines={1}>
+                  {collections.length} collection{collections.length > 1 ? 's' : ''}
                 </Text>
               </View>
             </View>

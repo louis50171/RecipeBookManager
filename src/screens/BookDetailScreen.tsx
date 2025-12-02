@@ -54,17 +54,30 @@ export default function BookDetailScreen({ navigation, route }: Props) {
   }
 
   const handleDelete = () => {
+    const recipeCount = bookRecipes.length;
+    const message = recipeCount > 0
+      ? `Êtes-vous sûr de vouloir supprimer ce livre ?\n\n${recipeCount} recette${recipeCount > 1 ? 's' : ''} deviendra${recipeCount > 1 ? 'ont' : ''} des recettes personnelles (sans livre associé).`
+      : 'Êtes-vous sûr de vouloir supprimer ce livre ?';
+
     Alert.alert(
       'Supprimer le livre',
-      'Êtes-vous sûr de vouloir supprimer ce livre ?',
+      message,
       [
         { text: 'Annuler', style: 'cancel' },
         {
           text: 'Supprimer',
           style: 'destructive',
           onPress: async () => {
-            await deleteBook(bookId);
+            const detachedCount = await deleteBook(bookId);
             navigation.goBack();
+
+            // Afficher une confirmation si des recettes ont été détachées
+            if (detachedCount > 0) {
+              Alert.alert(
+                'Livre supprimé',
+                `${detachedCount} recette${detachedCount > 1 ? 's ont' : ' a'} été détachée${detachedCount > 1 ? 's' : ''} et ${detachedCount > 1 ? 'sont' : 'est'} maintenant dans vos recettes personnelles.`
+              );
+            }
           },
         },
       ]

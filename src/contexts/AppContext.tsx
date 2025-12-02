@@ -26,7 +26,7 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Book, Recipe } from '../models/types';
+import { Book, Recipe, Collection } from '../models/types';
 import * as storage from '../services/storage';
 
 /**
@@ -42,6 +42,9 @@ interface AppContextType {
   /** Liste de tous les tags disponibles */
   tags: string[];
 
+  /** Liste de toutes les collections */
+  collections: Collection[];
+
   /** Recharge toutes les données depuis le stockage */
   loadData: () => Promise<void>;
 
@@ -51,8 +54,8 @@ interface AppContextType {
   /** Met à jour un livre existant */
   updateBook: (book: Book) => Promise<void>;
 
-  /** Supprime un livre */
-  deleteBook: (bookId: string) => Promise<void>;
+  /** Supprime un livre et retourne le nombre de recettes détachées */
+  deleteBook: (bookId: string) => Promise<number>;
 
   /** Ajoute une nouvelle recette */
   addRecipe: (recipe: Recipe) => Promise<void>;
@@ -68,6 +71,15 @@ interface AppContextType {
 
   /** Ajoute un nouveau tag à la liste */
   addTag: (tag: string) => Promise<void>;
+
+  /** Ajoute une nouvelle collection */
+  addCollection: (collection: Collection) => Promise<void>;
+
+  /** Met à jour une collection existante */
+  updateCollection: (collection: Collection) => Promise<void>;
+
+  /** Supprime une collection */
+  deleteCollection: (collectionId: string) => Promise<void>;
 }
 
 /**
@@ -93,21 +105,26 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   /** État local contenant tous les tags disponibles */
   const [tags, setTags] = useState<string[]>([]);
 
+  /** État local contenant toutes les collections */
+  const [collections, setCollections] = useState<Collection[]>([]);
+
   /**
    * Charge toutes les données depuis le stockage
    *
-   * Utilise Promise.all pour charger en parallèle les livres, recettes et tags,
+   * Utilise Promise.all pour charger en parallèle les livres, recettes, tags et collections,
    * puis met à jour l'état local avec les données récupérées.
    */
   const loadData = async () => {
-    const [loadedBooks, loadedRecipes, loadedTags] = await Promise.all([
+    const [loadedBooks, loadedRecipes, loadedTags, loadedCollections] = await Promise.all([
       storage.getBooks(),
       storage.getRecipes(),
       storage.getTags(),
+      storage.getCollections(),
     ]);
     setBooks(loadedBooks);
     setRecipes(loadedRecipes);
     setTags(loadedTags);
+    setCollections(loadedCollections);
   };
 
   /**
@@ -142,16 +159,18 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   /**
-   * Supprime un livre
+   * Supprime un livre et détache les recettes associées
    *
-   * Note : Cette fonction ne supprime pas automatiquement les recettes associées.
-   * Les recettes peuvent rester dans la base avec un bookId orphelin.
+   * Les recettes associées au livre supprimé deviennent des recettes personnelles
+   * (leur bookId est mis à undefined).
    *
    * @param bookId - L'identifiant du livre à supprimer
+   * @returns Le nombre de recettes détachées
    */
-  const deleteBook = async (bookId: string) => {
-    await storage.deleteBook(bookId);
+  const deleteBook = async (bookId: string): Promise<number> => {
+    const detachedCount = await storage.deleteBook(bookId);
     await loadData();
+    return detachedCount;
   };
 
   /**
@@ -228,12 +247,45 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     await loadData();
   };
 
+  /**
+   * Ajoute une nouvelle collection
+   *
+   * Sauvegarde la collection puis recharge toutes les données.
+   *
+   * @param collection - La collection à ajouter
+   */
+  const addCollection = async (collection: Collection) => {
+    await storage.saveCollection(collection);
+    await loadData();
+  };
+
+  /**
+   * Met à jour une collection existante
+   *
+   * @param collection - La collection avec les nouvelles données
+   */
+  const updateCollection = async (collection: Collection) => {
+    await storage.updateCollection(collection);
+    await loadData();
+  };
+
+  /**
+   * Supprime une collection
+   *
+   * @param collectionId - L'identifiant de la collection à supprimer
+   */
+  const deleteCollection = async (collectionId: string) => {
+    await storage.deleteCollection(collectionId);
+    await loadData();
+  };
+
   return (
     <AppContext.Provider
       value={{
         books,
         recipes,
         tags,
+        collections,
         loadData,
         addBook,
         updateBook,
@@ -243,6 +295,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         deleteRecipe,
         toggleFavorite,
         addTag,
+        addCollection,
+        updateCollection,
+        deleteCollection,
       }}
     >
       {children}

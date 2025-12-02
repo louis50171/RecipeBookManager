@@ -55,6 +55,7 @@ export default function RecipeDetailScreen({ navigation, route }: Props) {
   const [editedTags, setEditedTags] = useState<string[]>([]);
   const [showAddTag, setShowAddTag] = useState(false);
   const [newTagInput, setNewTagInput] = useState('');
+  const [customTagInput, setCustomTagInput] = useState('');
   
   const recipe = recipes.find(r => r.id === recipeId);
   const book = recipe?.bookId ? books.find(b => b.id === recipe.bookId) : null;
@@ -123,6 +124,21 @@ export default function RecipeDetailScreen({ navigation, route }: Props) {
       };
       await updateRecipe(updatedRecipe);
     }
+  };
+
+  const handleAddCustomTag = async () => {
+    const trimmedTag = customTagInput.trim();
+    if (!trimmedTag) {
+      Alert.alert('Erreur', 'Le nom du tag ne peut pas être vide');
+      return;
+    }
+    if (recipe.tags.includes(trimmedTag)) {
+      Alert.alert('Erreur', 'Ce tag est déjà ajouté à la recette');
+      return;
+    }
+    await quickAddTag(trimmedTag);
+    setCustomTagInput('');
+    setShowAddTag(false);
   };
 
   const handleDelete = () => {
@@ -312,34 +328,63 @@ export default function RecipeDetailScreen({ navigation, route }: Props) {
         animationType="fade"
         onRequestClose={() => setShowAddTag(false)}
       >
-        <TouchableOpacity 
+        <TouchableOpacity
           style={currentStyles.modalOverlay}
           activeOpacity={1}
           onPress={() => setShowAddTag(false)}
         >
-          <View style={currentStyles.modalContent}>
-            <Text style={currentStyles.modalTitle}>Ajouter un tag</Text>
-            <View style={currentStyles.quickTagsContainer}>
-              {availableTags.filter(tag => !recipe.tags.includes(tag)).slice(0, 12).map(tag => (
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <View style={currentStyles.modalContent}>
+              <Text style={currentStyles.modalTitle}>Ajouter un tag</Text>
+
+              <Text style={currentStyles.modalSectionTitle}>Tags existants</Text>
+              <View style={currentStyles.quickTagsContainer}>
+                {availableTags.filter(tag => !recipe.tags.includes(tag)).slice(0, 12).map(tag => (
+                  <TouchableOpacity
+                    key={tag}
+                    style={currentStyles.quickTag}
+                    onPress={async () => {
+                      await quickAddTag(tag);
+                      setShowAddTag(false);
+                    }}
+                  >
+                    <Text style={currentStyles.quickTagText}>{tag}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={currentStyles.modalSectionTitle}>Ou créer un nouveau tag</Text>
+              <View style={currentStyles.customTagContainer}>
+                <TextInput
+                  style={currentStyles.customTagInput}
+                  value={customTagInput}
+                  onChangeText={setCustomTagInput}
+                  placeholder="Nom du nouveau tag..."
+                  placeholderTextColor={theme.text.tertiary}
+                  onSubmitEditing={handleAddCustomTag}
+                />
                 <TouchableOpacity
-                  key={tag}
-                  style={currentStyles.quickTag}
-                  onPress={async () => {
-                    await quickAddTag(tag);
-                    setShowAddTag(false);
-                  }}
+                  style={currentStyles.addCustomTagButton}
+                  onPress={handleAddCustomTag}
                 >
-                  <Text style={currentStyles.quickTagText}>{tag}</Text>
+                  <Text style={currentStyles.addCustomTagButtonText}>Ajouter</Text>
                 </TouchableOpacity>
-              ))}
+              </View>
+
+              <TouchableOpacity
+                style={currentStyles.modalCloseButton}
+                onPress={() => {
+                  setShowAddTag(false);
+                  setCustomTagInput('');
+                }}
+              >
+                <Text style={currentStyles.modalCloseButtonText}>Fermer</Text>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity 
-              style={currentStyles.modalCloseButton}
-              onPress={() => setShowAddTag(false)}
-            >
-              <Text style={currentStyles.modalCloseButtonText}>Fermer</Text>
-            </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
     </ScrollView>
@@ -612,6 +657,41 @@ const styles = (theme: any) => StyleSheet.create({
   modalCloseButtonText: {
     color: theme.text.primary,
     fontSize: fontSizes.md,
+    fontWeight: '600',
+  },
+  modalSectionTitle: {
+    fontSize: fontSizes.md,
+    fontWeight: '600',
+    color: theme.text.primary,
+    marginTop: spacing.base,
+    marginBottom: spacing.sm,
+  },
+  customTagContainer: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.base,
+  },
+  customTagInput: {
+    flex: 1,
+    backgroundColor: theme.background,
+    padding: spacing.base,
+    borderRadius: borderRadius.md,
+    fontSize: fontSizes.base,
+    borderWidth: 1,
+    borderColor: theme.card.border,
+    color: theme.text.primary,
+  },
+  addCustomTagButton: {
+    backgroundColor: theme.primary,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.base,
+    borderRadius: borderRadius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addCustomTagButtonText: {
+    color: theme.button.text,
+    fontSize: fontSizes.base,
     fontWeight: '600',
   },
 });

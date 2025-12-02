@@ -20,7 +20,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Book, Recipe } from '../models/types';
+import { Book, Recipe, Collection } from '../models/types';
 
 /**
  * Clés utilisées pour le stockage dans AsyncStorage
@@ -35,6 +35,8 @@ const KEYS = {
   RECIPES: '@storage/recipes',
   /** Clé pour la liste des tags */
   TAGS: '@storage/tags',
+  /** Clé pour la liste des collections */
+  COLLECTIONS: '@storage/collections',
 };
 
 /**
@@ -117,24 +119,40 @@ export const updateBook = async (book: Book): Promise<void> => {
 };
 
 /**
- * Supprime un livre du stockage
+ * Supprime un livre du stockage et détache les recettes associées
  *
  * Retire le livre de la liste en se basant sur son ID.
- * Note : Cette fonction ne supprime pas les recettes associées au livre.
+ * Les recettes associées à ce livre voient leur bookId mis à undefined,
+ * devenant ainsi des "recettes personnelles".
  *
  * @param {string} bookId - L'identifiant unique du livre à supprimer
- * @returns {Promise<void>}
+ * @returns {Promise<number>} Le nombre de recettes détachées
  *
  * @example
- * await deleteBook('uuid-123');
+ * const detachedCount = await deleteBook('uuid-123');
+ * console.log(`${detachedCount} recettes détachées`);
  */
-export const deleteBook = async (bookId: string): Promise<void> => {
+export const deleteBook = async (bookId: string): Promise<number> => {
   try {
+    // Supprimer le livre
     const books = await getBooks();
     const updatedBooks = books.filter(b => b.id !== bookId);
     await AsyncStorage.setItem(KEYS.BOOKS, JSON.stringify(updatedBooks));
+
+    // Détacher les recettes associées (mettre bookId à undefined)
+    const recipes = await getRecipes();
+    const updatedRecipes = recipes.map(recipe =>
+      recipe.bookId === bookId
+        ? { ...recipe, bookId: undefined }
+        : recipe
+    );
+    const detachedCount = recipes.filter(r => r.bookId === bookId).length;
+    await AsyncStorage.setItem(KEYS.RECIPES, JSON.stringify(updatedRecipes));
+
+    return detachedCount;
   } catch (error) {
     console.error('Error deleting book:', error);
+    return 0;
   }
 };
 
@@ -345,4 +363,103 @@ const getDefaultTags = (): string[] => {
     'rapide',
     'difficile',
   ];
+};
+
+/**
+ * ============================================================================
+ * FONCTIONS DE GESTION DES COLLECTIONS
+ * ============================================================================
+ */
+
+/**
+ * Récupère la liste de toutes les collections depuis le stockage
+ *
+ * @returns {Promise<Collection[]>} Tableau de toutes les collections stockées, ou tableau vide si erreur
+ *
+ * @example
+ * const collections = await getCollections();
+ * console.log(`Vous avez ${collections.length} collections`);
+ */
+export const getCollections = async (): Promise<Collection[]> => {
+  try {
+    const data = await AsyncStorage.getItem(KEYS.COLLECTIONS);
+    return data ? JSON.parse(data) : [];
+  } catch (error) {
+    console.error('Error getting collections:', error);
+    return [];
+  }
+};
+
+/**
+ * Sauvegarde une nouvelle collection dans le stockage
+ *
+ * Ajoute la collection à la fin de la liste existante.
+ * L'ID unique doit être généré en amont.
+ *
+ * @param {Collection} collection - La collection à sauvegarder
+ * @returns {Promise<void>}
+ *
+ * @example
+ * const newCollection = {
+ *   id: 'uuid-789',
+ *   name: 'Desserts rapides',
+ *   tags: ['dessert', 'rapide'],
+ *   createdAt: new Date().toISOString()
+ * };
+ * await saveCollection(newCollection);
+ */
+export const saveCollection = async (collection: Collection): Promise<void> => {
+  try {
+    const collections = await getCollections();
+    const updatedCollections = [...collections, collection];
+    await AsyncStorage.setItem(KEYS.COLLECTIONS, JSON.stringify(updatedCollections));
+  } catch (error) {
+    console.error('Error saving collection:', error);
+  }
+};
+
+/**
+ * Met à jour une collection existante dans le stockage
+ *
+ * Recherche la collection par son ID et remplace ses données.
+ *
+ * @param {Collection} collection - La collection avec les données mises à jour
+ * @returns {Promise<void>}
+ *
+ * @example
+ * const updatedCollection = {
+ *   ...existingCollection,
+ *   name: 'Nouveau nom'
+ * };
+ * await updateCollection(updatedCollection);
+ */
+export const updateCollection = async (collection: Collection): Promise<void> => {
+  try {
+    const collections = await getCollections();
+    const updatedCollections = collections.map(c => c.id === collection.id ? collection : c);
+    await AsyncStorage.setItem(KEYS.COLLECTIONS, JSON.stringify(updatedCollections));
+  } catch (error) {
+    console.error('Error updating collection:', error);
+  }
+};
+
+/**
+ * Supprime une collection du stockage
+ *
+ * Retire la collection de la liste en se basant sur son ID.
+ *
+ * @param {string} collectionId - L'identifiant unique de la collection à supprimer
+ * @returns {Promise<void>}
+ *
+ * @example
+ * await deleteCollection('uuid-789');
+ */
+export const deleteCollection = async (collectionId: string): Promise<void> => {
+  try {
+    const collections = await getCollections();
+    const updatedCollections = collections.filter(c => c.id !== collectionId);
+    await AsyncStorage.setItem(KEYS.COLLECTIONS, JSON.stringify(updatedCollections));
+  } catch (error) {
+    console.error('Error deleting collection:', error);
+  }
 };

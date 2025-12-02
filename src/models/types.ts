@@ -88,3 +88,30 @@ export interface Recipe {
   /** Date de création de l'entrée au format ISO 8601 */
   createdAt: string;
 }
+
+/**
+ * Interface représentant une collection de recettes
+ *
+ * Une collection est une recherche sauvegardée basée sur des tags.
+ * Elle permet de regrouper des recettes selon des critères personnalisés
+ * sans avoir à refaire la même recherche à chaque fois.
+ *
+ * @interface Collection
+ */
+export interface Collection {
+  /** Identifiant unique de la collection (UUID généré à la création) */
+  id: string;
+
+  /** Nom de la collection (ex: "Desserts rapides", "Plats d'hiver") */
+  name: string;
+
+  /**
+   * Liste des tags qui définissent cette collection
+   * Les recettes affichées dans la collection seront celles qui contiennent
+   * AU MOINS UN de ces tags (union logique OR)
+   */
+  tags: string[];
+
+  /** Date de création de l'entrée au format ISO 8601 */
+  createdAt: string;
+}

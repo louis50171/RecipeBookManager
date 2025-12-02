@@ -34,7 +34,7 @@ export default function DrawerContent(props: DrawerContentComponentProps) {
   const { theme } = useTheme();
 
   /** Récupère les données de l'application pour afficher les compteurs */
-  const { books, recipes } = useApp();
+  const { books, recipes, collections } = useApp();
 
   /** Styles dynamiques basés sur le thème actuel */
   const styles = StyleSheet.create({
@@ -121,6 +121,12 @@ export default function DrawerContent(props: DrawerContentComponentProps) {
       icon: '🍳',
       title: 'Mes Recettes',
       subtitle: `${recipes.length} recette${recipes.length > 1 ? 's' : ''}`,
+    },
+    {
+      name: 'Collections',
+      icon: '📂',
+      title: 'Collections',
+      subtitle: `${collections.length} collection${collections.length > 1 ? 's' : ''}`,
     },
   ];
 

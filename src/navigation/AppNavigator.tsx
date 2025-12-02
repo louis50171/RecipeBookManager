@@ -39,6 +39,8 @@ import BookDetailScreen from '../screens/BookDetailScreen';
 import RecipesScreen from '../screens/RecipesScreen';
 import AddRecipeScreen from '../screens/AddRecipeScreen';
 import RecipeDetailScreen from '../screens/RecipeDetailScreen';
+import CollectionsScreen from '../screens/CollectionsScreen';
+import CollectionDetailScreen from '../screens/CollectionDetailScreen';
 import DrawerContent from '../components/DrawerContent';
 
 /**
@@ -67,6 +69,12 @@ export type RootStackParamList = {
 
   /** Détail d'une recette - recipeId obligatoire */
   RecipeDetail: { recipeId: string };
+
+  /** Liste des collections - pas de paramètres */
+  Collections: undefined;
+
+  /** Détail d'une collection - collectionId obligatoire */
+  CollectionDetail: { collectionId: string };
 };
 
 /** Stack Navigator pour la navigation principale */
@@ -97,6 +105,7 @@ function MainDrawer() {
       <Drawer.Screen name="Home" component={HomeScreen} />
       <Drawer.Screen name="Books" component={BooksScreen} />
       <Drawer.Screen name="Recipes" component={RecipesScreen} />
+      <Drawer.Screen name="Collections" component={CollectionsScreen} />
     </Drawer.Navigator>
   );
 }
@@ -150,6 +159,13 @@ export default function AppNavigator() {
           name="RecipeDetail"
           component={RecipeDetailScreen}
           options={{ title: 'Détails de la Recette' }}
+        />
+
+        {/* Écran de détail d'une collection */}
+        <Stack.Screen
+          name="CollectionDetail"
+          component={CollectionDetailScreen}
+          options={{ title: 'Détails de la Collection' }}
         />
       </Stack.Navigator>
     </NavigationContainer>
