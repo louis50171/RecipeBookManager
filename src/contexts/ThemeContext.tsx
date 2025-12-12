@@ -20,7 +20,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useColorScheme } from 'react-native';
-import { lightTheme, darkTheme, Theme } from '../theme/colors';
+import { lightTheme, darkTheme, modernCuisineTheme, Theme } from '../theme/colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /**
@@ -104,7 +104,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   };
 
   /** Sélectionne l'objet thème approprié en fonction de l'état isDark */
-  const theme = isDark ? darkTheme : lightTheme;
+  const theme = isDark ? darkTheme : modernCuisineTheme;
 
   return (
     <ThemeContext.Provider value={{ theme, isDark, toggleTheme }}>

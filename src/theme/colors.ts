@@ -14,7 +14,7 @@
  * tailles de police et bordures, optimisés pour tous les types d'écrans mobiles.
  */
 
-import { spacing, fontSizes, borderRadius, iconSizes } from './responsive';
+import { spacing, fontSizes, borderRadius, iconSizes, shadows } from './responsive';
 
 /**
  * Thème clair de l'application
@@ -157,6 +157,76 @@ export const darkTheme = {
 };
 
 /**
+ * Thème moderne inspiré de l'interface culinaire contemporaine
+ *
+ * Basé sur une palette épurée avec des tons orange vif et vert sauge,
+ * créant une esthétique moderne et raffinée pour une application de recettes.
+ * Fond crème doux avec cartes blanches et accents vibrants.
+ */
+export const modernCuisineTheme = {
+  /** Couleur de fond principale - Beige/crème très clair et lumineux */
+  background: '#FBF8F3',
+
+  /** Couleur de surface pour les cartes - Blanc pur */
+  surface: '#FFFFFF',
+
+  /** Couleur de surface secondaire - Beige très clair */
+  surfaceSecondary: '#F5F2ED',
+
+  /** Couleur primaire - Orange vif/corail dynamique */
+  primary: '#FF6B35',
+
+  /** Variante plus foncée de la couleur primaire */
+  primaryDark: '#E85A28',
+
+  /** Couleur d'accentuation - Orange plus clair */
+  accent: '#FF7A4D',
+
+  /** Palette de couleurs pour le texte */
+  text: {
+    /** Texte principal - Noir charbon pour une excellente lisibilité */
+    primary: '#1A1A1A',
+    /** Texte secondaire - Gris moyen */
+    secondary: '#6B6B6B',
+    /** Texte tertiaire - Gris clair */
+    tertiary: '#999999',
+  },
+
+  /** Couleurs spécifiques aux cartes */
+  card: {
+    /** Fond des cartes - Blanc pur */
+    background: '#FFFFFF',
+    /** Bordure des cartes - Gris très clair */
+    border: '#E8E8E8',
+  },
+
+  /** Couleurs des boutons */
+  button: {
+    /** Fond du bouton principal - Orange vif */
+    primary: '#FF6B35',
+    /** Texte des boutons - Blanc */
+    text: '#FFFFFF',
+  },
+
+  /** Couleurs des tags */
+  tag: {
+    /** Fond des tags - Vert sauge doux */
+    background: '#E8F0E3',
+    /** Texte des tags - Vert olive */
+    text: '#7B9B6F',
+  },
+
+  /** Couleur pour l'icône de favori */
+  favorite: '#FF6B35',
+
+  /** Couleur d'erreur - Rouge vibrant */
+  error: '#E74C3C',
+
+  /** Couleur des séparateurs et lignes de division */
+  divider: '#E8E8E8',
+};
+
+/**
  * Type TypeScript représentant la structure d'un thème
  *
  * Permet d'assurer que darkTheme et lightTheme ont la même structure
@@ -180,4 +250,7 @@ export const responsiveTheme = {
 
   /** Tailles d'icônes responsive */
   iconSizes,
+
+  /** Styles d'ombres pour cartes et éléments */
+  shadows,
 };

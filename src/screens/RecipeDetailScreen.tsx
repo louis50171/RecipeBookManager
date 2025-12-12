@@ -34,7 +34,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { useApp } from '../contexts/AppContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { Recipe } from '../models/types';
-import { spacing, fontSizes, borderRadius, iconSizes } from '../theme/responsive';
+import { spacing, fontSizes, borderRadius, iconSizes, shadows } from '../theme/responsive';
 
 type RecipeDetailScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'RecipeDetail'>;
 type RecipeDetailScreenRouteProp = RouteProp<RootStackParamList, 'RecipeDetail'>;
@@ -436,6 +436,10 @@ const styles = (theme: any) => StyleSheet.create({
   },
   section: {
     marginBottom: spacing.xl,
+    backgroundColor: theme.surface,
+    padding: spacing.base,
+    borderRadius: borderRadius.lg,
+    ...shadows.card,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -483,6 +487,7 @@ const styles = (theme: any) => StyleSheet.create({
     borderRadius: borderRadius.md,
     borderWidth: 1,
     borderColor: theme.card.border,
+    ...shadows.elevated,
   },
   bookLinkText: {
     fontSize: fontSizes.md,
@@ -620,6 +625,7 @@ const styles = (theme: any) => StyleSheet.create({
     padding: spacing.base,
     width: '100%',
     maxWidth: 400,
+    ...shadows.modal,
   },
   modalTitle: {
     fontSize: fontSizes.xl,
