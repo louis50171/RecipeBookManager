@@ -41,6 +41,7 @@ import AddRecipeScreen from '../screens/AddRecipeScreen';
 import RecipeDetailScreen from '../screens/RecipeDetailScreen';
 import CollectionsScreen from '../screens/CollectionsScreen';
 import CollectionDetailScreen from '../screens/CollectionDetailScreen';
+import { DiscoverScreen } from '../screens/DiscoverScreen';
 import DrawerContent from '../components/DrawerContent';
 
 /**
@@ -49,8 +50,14 @@ import DrawerContent from '../components/DrawerContent';
  * Permet le type-checking des navigations et des paramètres de routes
  */
 export type RootStackParamList = {
+  /** Drawer principal - pas de paramètres */
+  MainDrawer: undefined;
+
   /** Écran d'accueil - pas de paramètres */
   Home: undefined;
+
+  /** Écran Découvrir - pas de paramètres */
+  Discover: undefined;
 
   /** Liste des livres - pas de paramètres */
   Books: undefined;
@@ -103,6 +110,7 @@ function MainDrawer() {
       }}
     >
       <Drawer.Screen name="Home" component={HomeScreen} />
+      <Drawer.Screen name="Discover" component={DiscoverScreen} />
       <Drawer.Screen name="Books" component={BooksScreen} />
       <Drawer.Screen name="Recipes" component={RecipesScreen} />
       <Drawer.Screen name="Collections" component={CollectionsScreen} />

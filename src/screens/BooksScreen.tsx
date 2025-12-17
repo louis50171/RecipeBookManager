@@ -27,6 +27,7 @@ import { useApp } from '../contexts/AppContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { Book } from '../models/types';
 import { spacing, fontSizes, borderRadius, iconSizes, screenDimensions } from '../theme/responsive';
+import { formatAuthorDisplay } from '../utils/formatters';
 
 type BooksScreenNavigationProp = DrawerNavigationProp<any> & NativeStackNavigationProp<RootStackParamList, 'Books'>;
 
@@ -41,10 +42,11 @@ export default function BooksScreen({ navigation }: Props) {
   /** État de la recherche */
   const [searchQuery, setSearchQuery] = useState('');
 
-  /** Filtre les livres selon la recherche (titre, auteur ou catégorie) */
+  /** Filtre les livres selon la recherche (titre, auteur, pseudonyme ou catégorie) */
   const filteredBooks = books.filter(book =>
     book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (book.pseudonym && book.pseudonym.toLowerCase().includes(searchQuery.toLowerCase())) ||
     (book.category && book.category.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
@@ -205,7 +207,7 @@ export default function BooksScreen({ navigation }: Props) {
         )}
       </View>
       <Text style={styles.bookTitle} numberOfLines={2}>{item.title}</Text>
-      <Text style={styles.bookAuthor} numberOfLines={1}>{item.author}</Text>
+      <Text style={styles.bookAuthor} numberOfLines={1}>{formatAuthorDisplay(item.author, item.pseudonym)}</Text>
     </TouchableOpacity>
   );
 

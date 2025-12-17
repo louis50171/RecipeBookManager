@@ -63,7 +63,7 @@ interface SearchResult {
 }
 
 export default function AddBookScreen({ navigation, route }: Props) {
-  const { addBook, updateBook, books } = useApp();
+  const { addBook, updateBook, books, suggestBookCategory } = useApp();
   const { theme } = useTheme();
   const editBookId = route.params?.bookId;
   const editingBook = editBookId ? books.find(b => b.id === editBookId) : null;
@@ -77,12 +77,14 @@ export default function AddBookScreen({ navigation, route }: Props) {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [title, setTitle] = useState(editingBook?.title || '');
   const [author, setAuthor] = useState(editingBook?.author || '');
+  const [pseudonym, setPseudonym] = useState(editingBook?.pseudonym || '');
   const [editor, setEditor] = useState(editingBook?.editor || '');
   const [year, setYear] = useState(editingBook?.year?.toString() || '');
   const [category, setCategory] = useState(editingBook?.category || '');
   const [coverImage, setCoverImage] = useState(editingBook?.coverImage || '');
   const [showCoverOptions, setShowCoverOptions] = useState(false);
-  
+  const [showCategorySuggestions, setShowCategorySuggestions] = useState(false);
+
   const [showScanner, setShowScanner] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
@@ -164,6 +166,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
   const fillBookData = (bookData: BookData) => {
     setTitle(bookData.title || '');
     setAuthor(bookData.authors ? bookData.authors.join(', ') : '');
+    setPseudonym(''); // Google Books n'a pas de champ pseudonyme
     setEditor(bookData.publisher || '');
     setYear(bookData.publishedDate ? bookData.publishedDate.substring(0, 4) : '');
     setCategory(bookData.categories ? bookData.categories[0] : '');
@@ -256,6 +259,27 @@ export default function AddBookScreen({ navigation, route }: Props) {
     }
   };
 
+  const getSuggestions = () => {
+    if (title.trim() && author.trim()) {
+      return suggestBookCategory(title, author, pseudonym);
+    }
+    return [];
+  };
+
+  const handleShowSuggestions = () => {
+    const suggestions = getSuggestions();
+    if (suggestions.length > 0) {
+      setShowCategorySuggestions(true);
+    } else {
+      Alert.alert('Aucune suggestion', 'Nous n\'avons pas pu suggérer de catégorie pour ce livre. Veuillez saisir une catégorie manuellement.');
+    }
+  };
+
+  const handleSuggestionSelect = (suggestedCategory: string) => {
+    setCategory(suggestedCategory);
+    setShowCategorySuggestions(false);
+  };
+
   const handleSave = async () => {
     if (!title.trim() || !author.trim()) {
       Alert.alert('Erreur', 'Le titre et l\'auteur sont obligatoires');
@@ -267,6 +291,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
         ...editingBook,
         title: title.trim(),
         author: author.trim(),
+        pseudonym: pseudonym.trim() || undefined,
         editor: editor.trim() || undefined,
         year: year.trim() ? parseInt(year) : undefined,
         category: category.trim() || undefined,
@@ -278,6 +303,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
         id: Date.now().toString(),
         title: title.trim(),
         author: author.trim(),
+        pseudonym: pseudonym.trim() || undefined,
         editor: editor.trim() || undefined,
         year: year.trim() ? parseInt(year) : undefined,
         category: category.trim() || undefined,
@@ -672,6 +698,57 @@ export default function AddBookScreen({ navigation, route }: Props) {
       color: theme.text.secondary,
       fontWeight: '600',
     },
+    suggestButton: {
+      backgroundColor: theme.primary,
+      paddingHorizontal: spacing.base,
+      paddingVertical: spacing.xs,
+      borderRadius: borderRadius.md,
+      marginBottom: spacing.xs,
+    },
+    suggestButtonText: {
+      color: theme.button.text,
+      fontSize: fontSizes.sm,
+      fontWeight: '600',
+    },
+    suggestionsScroll: {
+      maxHeight: 400,
+      width: '100%',
+    },
+    suggestionCard: {
+      backgroundColor: theme.card.background,
+      borderRadius: borderRadius.md,
+      padding: spacing.base,
+      marginBottom: spacing.sm,
+      borderWidth: 1,
+      borderColor: theme.card.border,
+    },
+    suggestionCardHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.xs,
+    },
+    suggestionCardTitle: {
+      fontSize: fontSizes.md,
+      fontWeight: '600',
+      color: theme.text.primary,
+      flex: 1,
+    },
+    confidenceBadgeSmall: {
+      backgroundColor: theme.primary + '20',
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      borderRadius: borderRadius.sm,
+    },
+    confidenceText: {
+      fontSize: fontSizes.xs,
+      fontWeight: '600',
+      color: theme.primary,
+    },
+    suggestionCardReason: {
+      fontSize: fontSizes.sm,
+      color: theme.text.secondary,
+    },
   });
 
   return (
@@ -873,6 +950,15 @@ export default function AddBookScreen({ navigation, route }: Props) {
           placeholderTextColor={theme.text.tertiary}
         />
 
+        <Text style={styles.label}>Pseudonyme</Text>
+        <TextInput
+          style={styles.input}
+          value={pseudonym}
+          onChangeText={setPseudonym}
+          placeholder="Ex: Gastronogeek, Chef Damien..."
+          placeholderTextColor={theme.text.tertiary}
+        />
+
         <Text style={styles.label}>Éditeur</Text>
         <TextInput
           style={styles.input}
@@ -892,7 +978,17 @@ export default function AddBookScreen({ navigation, route }: Props) {
           keyboardType="numeric"
         />
 
-        <Text style={styles.label}>Catégorie</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Text style={styles.label}>Catégorie</Text>
+          {title.trim() && author.trim() && (
+            <TouchableOpacity
+              onPress={handleShowSuggestions}
+              style={styles.suggestButton}
+            >
+              <Text style={styles.suggestButtonText}>✨ Suggérer</Text>
+            </TouchableOpacity>
+          )}
+        </View>
         <TextInput
           style={styles.input}
           value={category}
@@ -948,7 +1044,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
         animationType="fade"
         onRequestClose={() => setShowCoverOptions(false)}
       >
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.modalOverlay}
           activeOpacity={1}
           onPress={() => setShowCoverOptions(false)}
@@ -961,9 +1057,51 @@ export default function AddBookScreen({ navigation, route }: Props) {
             <TouchableOpacity style={styles.modalOption} onPress={addCoverUrl}>
               <Text style={styles.modalOptionText}>🔗 Entrer une URL</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.modalCancelButton}
               onPress={() => setShowCoverOptions(false)}
+            >
+              <Text style={styles.modalCancelText}>Annuler</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      <Modal
+        visible={showCategorySuggestions}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowCategorySuggestions(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowCategorySuggestions(false)}
+        >
+          <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
+            <Text style={styles.modalTitle}>✨ Suggestions de catégorie</Text>
+            <ScrollView style={styles.suggestionsScroll}>
+              {getSuggestions().map((suggestion, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.suggestionCard}
+                  onPress={() => handleSuggestionSelect(suggestion.category)}
+                >
+                  <View style={styles.suggestionCardHeader}>
+                    <Text style={styles.suggestionCardTitle}>{suggestion.category}</Text>
+                    <View style={styles.confidenceBadgeSmall}>
+                      <Text style={styles.confidenceText}>
+                        {Math.round(suggestion.confidence * 100)}%
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.suggestionCardReason}>{suggestion.reason}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <TouchableOpacity
+              style={styles.modalCancelButton}
+              onPress={() => setShowCategorySuggestions(false)}
             >
               <Text style={styles.modalCancelText}>Annuler</Text>
             </TouchableOpacity>

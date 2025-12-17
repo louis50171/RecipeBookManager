@@ -25,6 +25,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { useApp } from '../contexts/AppContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { spacing, fontSizes, borderRadius, iconSizes, screenDimensions } from '../theme/responsive';
+import { formatAuthorDisplay } from '../utils/formatters';
 
 type BookDetailScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'BookDetail'>;
 type BookDetailScreenRouteProp = RouteProp<RootStackParamList, 'BookDetail'>;
@@ -109,7 +110,7 @@ export default function BookDetailScreen({ navigation, route }: Props) {
         </View>
 
         <Text style={currentStyles.title}>{book.title}</Text>
-        <Text style={currentStyles.author}>Par {book.author}</Text>
+        <Text style={currentStyles.author}>Par {formatAuthorDisplay(book.author, book.pseudonym)}</Text>
         
         {book.editor && (
           <Text style={currentStyles.info}>Éditeur: {book.editor}</Text>

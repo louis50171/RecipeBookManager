@@ -25,6 +25,9 @@ export interface Book {
   /** Nom de l'auteur du livre */
   author: string;
 
+  /** Pseudonyme ou nom de scène de l'auteur (optionnel) */
+  pseudonym?: string;
+
   /** Nom de la maison d'édition (optionnel) */
   editor?: string;
 

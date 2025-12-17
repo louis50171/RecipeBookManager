@@ -28,6 +28,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Book, Recipe, Collection } from '../models/types';
 import * as storage from '../services/storage';
+import { AIService, CategorySuggestion, BookRecommendation, DiscoverInsights } from '../services/AIService';
 
 /**
  * Interface définissant la structure du contexte de l'application
@@ -80,6 +81,15 @@ interface AppContextType {
 
   /** Supprime une collection */
   deleteCollection: (collectionId: string) => Promise<void>;
+
+  /** Suggère une catégorie pour un livre basée sur son titre, auteur et pseudonyme */
+  suggestBookCategory: (title: string, author: string, pseudonym?: string) => CategorySuggestion[];
+
+  /** Obtient des recommandations de livres basées sur les préférences */
+  getBookRecommendations: () => BookRecommendation[];
+
+  /** Génère des insights pour l'écran Découvrir */
+  getDiscoverInsights: (searchQuery?: string) => DiscoverInsights;
 }
 
 /**
@@ -279,6 +289,46 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     await loadData();
   };
 
+  /**
+   * Suggère une catégorie pour un livre basée sur son titre, auteur et pseudonyme
+   *
+   * Utilise l'IA locale pour analyser le titre, l'auteur et le pseudonyme et proposer
+   * des catégories pertinentes avec un niveau de confiance.
+   *
+   * @param title - Le titre du livre
+   * @param author - L'auteur du livre
+   * @param pseudonym - Le pseudonyme de l'auteur (optionnel)
+   * @returns Un tableau de suggestions de catégories triées par confiance décroissante
+   */
+  const suggestBookCategory = (title: string, author: string, pseudonym?: string): CategorySuggestion[] => {
+    return AIService.suggestCategory(title, author, books, pseudonym);
+  };
+
+  /**
+   * Obtient des recommandations de livres basées sur les préférences de l'utilisateur
+   *
+   * Analyse les recettes favorites pour identifier les préférences et suggère
+   * des catégories de livres qui pourraient intéresser l'utilisateur.
+   *
+   * @returns Un tableau de recommandations de livres
+   */
+  const getBookRecommendations = (): BookRecommendation[] => {
+    return AIService.getBookRecommendations(recipes, books);
+  };
+
+  /**
+   * Génère des insights pour l'écran Découvrir
+   *
+   * Combine les livres existants, les statistiques et les suggestions
+   * pour créer une vue complète de découverte.
+   *
+   * @param searchQuery - Requête de recherche optionnelle
+   * @returns Les insights de découverte
+   */
+  const getDiscoverInsights = (searchQuery?: string): DiscoverInsights => {
+    return AIService.getDiscoverInsights(books, recipes, searchQuery);
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -298,6 +348,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         addCollection,
         updateCollection,
         deleteCollection,
+        suggestBookCategory,
+        getBookRecommendations,
+        getDiscoverInsights,
       }}
     >
       {children}

@@ -8,11 +8,10 @@ RecipeBookManager est une alternative moderne aux classeurs de recettes traditio
 
 ### Pourquoi cette application ?
 
-- **Organisation simplifiée** : Fini les post-its et les recettes perdues dans différents livres ou la mise en place longue de classeur excel
+- **Organisation simplifiée** : Remplacement des post-its/excel difficile ou long à mettre en place, et gestion optimisé des recettes dans différents livres
 - **Recherche rapide** : Retrouvez une recette par saison, type de plat, ou difficulté en quelques secondes
 - **Données locales** : Toutes vos données restent sur votre appareil (utilisation d'AsyncStorage)
 - **Interface moderne** : Design épuré avec support du mode sombre
-- **Scan automatique** : Ajout de recettes par scan (fonctionnalité en développement pour des raisons de droits d'auteur)
 
 ## Fonctionnalités
 
@@ -166,11 +165,6 @@ Ce projet est sous licence MIT - voir le fichier LICENSE pour plus de détails.
 
 Développé par **louis50171** - Une solution moderne pour les passionnés de cuisine qui souhaitent organiser leur collection de recettes.
 
-## Remerciements
-
-- La communauté React Native et Expo pour leurs excellents outils
-- Tous les contributeurs de React Navigation et React Native Paper
-- Les utilisateurs beta-testeurs qui ont fourni des retours précieux
 
 ---
 

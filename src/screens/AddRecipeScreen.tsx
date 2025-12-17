@@ -33,6 +33,7 @@ import { useApp } from '../contexts/AppContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { Recipe } from '../models/types';
 import { spacing, fontSizes, borderRadius } from '../theme/responsive';
+import { formatAuthorDisplay } from '../utils/formatters';
 
 type AddRecipeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'AddRecipe'>;
 
@@ -254,7 +255,7 @@ export default function AddRecipeScreen({ navigation }: Props) {
                 }}
               >
                 <Text style={styles.bookPickerOptionText}>{book.title}</Text>
-                <Text style={styles.bookPickerOptionAuthor}>{book.author}</Text>
+                <Text style={styles.bookPickerOptionAuthor}>{formatAuthorDisplay(book.author, book.pseudonym)}</Text>
               </TouchableOpacity>
             ))}
           </View>
