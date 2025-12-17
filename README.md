@@ -165,11 +165,6 @@ Ce projet est sous licence MIT - voir le fichier LICENSE pour plus de détails.
 
 Développé par **louis50171** - Une solution moderne pour les passionnés de cuisine qui souhaitent organiser leur collection de recettes.
 
-## Remerciements
-
-- La communauté React Native et Expo pour leurs excellents outils
-- Tous les contributeurs de React Navigation et React Native Paper
-- Les utilisateurs beta-testeurs qui ont fourni des retours précieux
 
 ---
 
