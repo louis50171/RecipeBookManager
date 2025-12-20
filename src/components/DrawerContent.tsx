@@ -111,12 +111,6 @@ export default function DrawerContent(props: DrawerContentComponentProps) {
       subtitle: 'Vue d\'ensemble',
     },
     {
-      name: 'Discover',
-      icon: '✨',
-      title: 'Découvrir',
-      subtitle: 'Suggestions IA',
-    },
-    {
       name: 'Books',
       icon: '📚',
       title: 'Mes Livres',

@@ -163,15 +163,74 @@ export default function AddBookScreen({ navigation, route }: Props) {
     );
   };
 
-  const fillBookData = (bookData: BookData) => {
-    setTitle(bookData.title || '');
-    setAuthor(bookData.authors ? bookData.authors.join(', ') : '');
-    setPseudonym(''); // Google Books n'a pas de champ pseudonyme
-    setEditor(bookData.publisher || '');
-    setYear(bookData.publishedDate ? bookData.publishedDate.substring(0, 4) : '');
-    setCategory(bookData.categories ? bookData.categories[0] : '');
-    setCoverImage(bookData.imageLinks?.thumbnail || '');
-    setSearchResults([]);
+  const isCookingBook = (bookData: BookData): boolean => {
+    const categories = bookData.categories || [];
+    const title = (bookData.title || '').toLowerCase();
+
+    // Mots-clés de cuisine dans les catégories Google Books
+    const cookingKeywords = [
+      'cooking', 'cookbooks', 'cuisine', 'recipe', 'recipes',
+      'culinary', 'food', 'baking', 'pastry', 'gastronomie'
+    ];
+
+    // Vérifier les catégories
+    const hasCookingCategory = categories.some(cat =>
+      cookingKeywords.some(keyword => cat.toLowerCase().includes(keyword))
+    );
+
+    // Vérifier aussi le titre comme fallback
+    const hasCookingInTitle = cookingKeywords.some(keyword => title.includes(keyword));
+
+    return hasCookingCategory || hasCookingInTitle;
+  };
+
+  const fillBookData = (bookData: BookData, showWarningIfNotCooking: boolean = false) => {
+    // Vérifier si c'est un livre de cuisine
+    const isCooking = isCookingBook(bookData);
+
+    if (showWarningIfNotCooking && !isCooking) {
+      Alert.alert(
+        '⚠️ Livre hors sujet détecté',
+        `Ce livre ne semble pas être un livre de recettes.\n\nCatégories: ${bookData.categories?.join(', ') || 'Aucune'}\n\nVoulez-vous quand même l'ajouter ?`,
+        [
+          {
+            text: 'Annuler',
+            style: 'cancel',
+            onPress: () => {
+              // Ne rien remplir
+            }
+          },
+          {
+            text: 'Ajouter quand même',
+            onPress: () => {
+              // Remplir les données
+              setTitle(bookData.title || '');
+              setAuthor(bookData.authors ? bookData.authors.join(', ') : '');
+              setPseudonym(''); // Google Books n'a pas de champ pseudonyme
+              setEditor(bookData.publisher || '');
+              setYear(bookData.publishedDate ? bookData.publishedDate.substring(0, 4) : '');
+              setCategory(bookData.categories ? bookData.categories[0] : '');
+              setCoverImage(bookData.imageLinks?.thumbnail || '');
+              setSearchResults([]);
+            }
+          }
+        ]
+      );
+    } else {
+      // Livre de cuisine ou pas de vérification demandée
+      setTitle(bookData.title || '');
+      setAuthor(bookData.authors ? bookData.authors.join(', ') : '');
+      setPseudonym(''); // Google Books n'a pas de champ pseudonyme
+      setEditor(bookData.publisher || '');
+      setYear(bookData.publishedDate ? bookData.publishedDate.substring(0, 4) : '');
+      setCategory(bookData.categories ? bookData.categories[0] : '');
+      setCoverImage(bookData.imageLinks?.thumbnail || '');
+      setSearchResults([]);
+
+      if (showWarningIfNotCooking && isCooking) {
+        Alert.alert('✅ Livre de cuisine', 'Ce livre semble bien être un livre de recettes !');
+      }
+    }
   };
 
   const searchByISBNWithData = async (isbnData: string) => {
@@ -183,8 +242,8 @@ export default function AddBookScreen({ navigation, route }: Props) {
       const data = await response.json();
 
       if (data.items && data.items.length > 0) {
-        fillBookData(data.items[0].volumeInfo);
-        Alert.alert('Succès', 'Livre trouvé ! Vérifiez et modifiez les informations si nécessaire.');
+        // Activer la vérification pour les recherches ISBN
+        fillBookData(data.items[0].volumeInfo, true);
       } else {
         Alert.alert('Non trouvé', 'Aucun livre trouvé avec cet ISBN. Essayez la recherche par titre.');
       }
