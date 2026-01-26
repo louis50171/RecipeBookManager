@@ -1,0 +1,456 @@
+================================================================================
+APPLICATION DE GESTION DE BIBLIOTHÈQUE DE LIVRES DE CUISINE
+================================================================================
+
+CONCEPT GÉNÉRAL
+================================================================================
+
+Application mobile destinée aux amateurs de cuisine possédant une collection
+importante de livres de cuisine. Elle permet d'indexer et de retrouver
+rapidement des recettes spécifiques à travers toute sa bibliothèque, sans
+jamais remplacer le livre physique.
+
+Alternative moderne et pratique aux fichiers Excel personnels souvent utilisés
+en cuisine et mal organisés.
+
+L'application fonctionne comme un catalogue personnel : elle référence chaque
+recette avec son livre source, permettant de localiser instantanément où se
+trouve la recette recherchée pour ensuite sortir le livre et cuisiner avec
+l'ouvrage original.
+
+Usage strictement personnel - pas de partage entre utilisateurs.
+
+
+FONCTIONNALITÉS PRINCIPALES
+================================================================================
+
+1. GESTION DE LA BIBLIOTHÈQUE DE LIVRES
+
+   Écran d'accueil (HomeScreen) :
+   - Dashboard avec statistiques en temps réel :
+     * Nombre total de livres
+     * Nombre total de recettes
+     * Nombre de recettes favorites
+   - Cartes de navigation rapide vers les sections principales
+   - Accès au menu drawer
+   - Bouton de changement de thème (clair/sombre)
+
+   Liste des livres (BooksScreen) :
+   - Affichage en grille 2 colonnes avec couvertures
+   - Ratio portrait 0.7 (comme de vrais livres)
+   - Recherche en temps réel par :
+     * Titre
+     * Auteur
+     * Pseudonyme d'auteur
+     * Catégorie
+   - Compteur de livres
+   - État vide avec message d'encouragement
+   - Navigation vers les détails du livre
+
+   Ajout/modification de livres (AddBookScreen) :
+   - TROIS méthodes de découverte de livres :
+     * SCAN DU CODE-BARRE ISBN : Scanner de caméra intégré avec auto-remplissage
+     * RECHERCHE PAR TITRE : Via API Google Books avec filtre cuisine
+     * RECHERCHE PAR AUTEUR : Via API Google Books avec filtre cuisine
+   - Validation automatique "livre de cuisine" (alerte si non-cuisine)
+   - Formulaire complet :
+     * Titre (requis)
+     * Auteur (requis)
+     * Pseudonyme d'auteur (optionnel)
+     * Éditeur (optionnel)
+     * Année de publication (optionnelle)
+     * Catégorie (optionnelle)
+     * Photo de couverture
+   - Gestion de la couverture :
+     * Sélection depuis la galerie
+     * Saisie d'URL
+     * Suppression d'image
+   - ✨ SUGGESTIONS DE CATÉGORIES PAR IA basées sur :
+     * Analyse du titre
+     * Reconnaissance de l'auteur
+     * Base de données de 20+ chefs célèbres
+     * Pseudonymes d'auteurs
+     * Patterns des livres existants
+   - Mode édition pour livres existants
+   - Validation ISBN et auto-remplissage
+
+   Détails d'un livre (BookDetailScreen) :
+   - Informations complètes du livre :
+     * Couverture ou placeholder
+     * Titre et détails auteur
+     * Éditeur, année, catégorie
+   - Liste des recettes associées au livre
+   - Indicateurs de favoris sur les recettes
+   - Boutons édition et suppression
+   - Compteur de recettes
+   - Navigation vers détails des recettes
+   - Gestion intelligente de la suppression (les recettes deviennent personnelles)
+
+2. INDEXATION DES RECETTES
+
+   Liste des recettes (RecipesScreen) :
+   - Vue complète de toutes les recettes
+   - Recherche par :
+     * Nom de recette
+     * Tags
+   - Boutons de filtres :
+     * Toutes les recettes
+     * Favoris uniquement
+   - Toggle favori direct depuis la liste (icône étoile)
+   - Cartes de recettes affichant :
+     * Nom de la recette
+     * Livre source
+     * 3 premiers tags + compteur de débordement
+   - Bouton ajout de nouvelle recette
+   - Gestion d'état vide
+
+   Ajout de recettes (AddRecipeScreen) :
+   - Formulaire de recette avec :
+     * Nom de recette (requis)
+     * Sélection livre source (dropdown optionnel)
+     * Tags multiples avec suggestions
+     * Notes/instructions personnelles
+     * Photo de recette (optionnelle)
+   - Gestion des tags :
+     * Suggestions depuis les tags existants
+     * Création de tags en texte libre
+     * Tags sélectionnés affichés en chips
+     * Suppression de tags par clic
+   - Options d'image :
+     * Prendre une photo avec la caméra
+     * Choisir depuis la galerie
+     * Aperçu et suppression d'image
+   - Synchronisation auto des nouveaux tags à la liste globale
+
+   Détails d'une recette (RecipeDetailScreen) :
+   - Affichage complet de la recette :
+     * Nom de la recette
+     * Lien vers le livre source (navigation cliquable)
+     * Tags avec bouton d'ajout
+     * Photo de recette
+     * Notes personnelles
+   - ✨ MODE ÉDITION EN LIGNE pour :
+     * Nom de recette
+     * Tags (ajout/suppression avec suggestions)
+     * Notes
+     * Gestion de la photo
+   - Toggle favori avec icône étoile
+   - Gestion des tags dans une modale :
+     * Ajout rapide depuis tags existants
+     * Création de tags personnalisés
+   - Upload d'image/intégration caméra
+   - Suppression avec dialogue de confirmation
+
+3. RECHERCHE ET FILTRES
+
+   Recherche multicouche :
+   - Livres : titre, auteur, pseudonyme, catégorie
+   - Recettes : nom, tags
+   - Collections : correspondance de recettes par tag (logique OU)
+   - Résultats en temps réel
+   - Correspondance insensible à la casse
+
+   Système de tags :
+   - Gestion globale des tags
+   - Auto-création depuis les recettes
+   - Suggestions de tags dans les champs de saisie
+   - Affichage des tags avec compteur de débordement
+   - Tags multiples par recette
+   - Tags prédéfinis suggérés :
+     * Saison (printemps, été, automne, hiver)
+     * Type de plat (entrée, plat, dessert, apéritif, etc.)
+     * Difficulté (facile, moyen, difficile)
+     * Temps approximatif
+     * Ingrédients principaux (sans quantités)
+     * Régimes : végétarien, sans gluten, vegan, etc.
+
+   Navigation par livre :
+   - "Toutes les recettes du livre X"
+   - Filtre favoris uniquement
+   - Filtrage par tags
+
+4. COLLECTIONS DE RECETTES
+
+   Liste des collections (CollectionsScreen) :
+   - Affichage de toutes les collections sauvegardées
+   - Cartes de collection montrant :
+     * Nom de la collection
+     * Aperçu des tags
+   - Modale de création de collection :
+     * Saisie du nom de collection
+     * Sélection multi-tags (toggle visuel)
+     * Validation (minimum 1 tag requis)
+   - Compteur de collections
+   - État vide avec instructions
+   - Navigation vers les détails
+
+   Détails d'une collection (CollectionDetailScreen) :
+   - Informations complètes :
+     * Nom de la collection
+     * Tous les tags de la collection
+   - Liste de recettes filtrées :
+     * Recettes avec N'IMPORTE QUEL tag de la collection (logique OU)
+     * Cartes avec nom, source, tags, favoris
+   - ✨ ÉDITION EN LIGNE de la collection :
+     * Renommer la collection
+     * Modifier les tags
+   - Toggle favori sur les recettes
+   - Navigation vers recettes
+   - Suppression de collection avec confirmation
+   - Compteur de recettes avec résultats du filtrage
+
+5. FONCTIONNALITÉS COMPLÉMENTAIRES
+
+   Système de thèmes (✨ NOUVELLE FONCTIONNALITÉ) :
+   - TROIS thèmes complets :
+     * Modern Cuisine (clair) : Esthétique orange/crème
+     * Light Theme : Tons beiges/orange chauds
+     * Dark Theme : Gris foncé/noir avec accents orange
+   - Persistance du thème dans AsyncStorage
+   - Détection du thème système au premier lancement
+   - Changement de thème en temps réel
+   - Design responsive :
+     * Espacement adaptatif pour toutes tailles d'écran
+     * Tailles de police responsive
+     * Rayon de bordure dynamique
+     * Mise à l'échelle des icônes
+     * Système d'ombres pour la profondeur
+     * Détection et optimisation petits appareils
+     * Gestion de l'orientation
+
+   Gestion des images avancée :
+   - Couvertures de livres :
+     * Sélection caméra/galerie
+     * Support d'URL
+     * Contrôle du ratio d'aspect (2:3 pour livres)
+     * Aperçu et suppression
+     * Style de placeholder si manquant
+   - Images de recettes :
+     * Prise de photo avec la caméra
+     * Sélection depuis la galerie
+     * Support édition/recadrage
+     * Affichage plein écran dans les détails
+     * Suppression et remplacement faciles
+
+   Navigation :
+   - Drawer navigation menu
+   - Navigation par stack pour les écrans de détail
+   - Gestion appropriée du bouton retour
+   - Deep linking entre entités liées
+
+   Accessibilité :
+   - Labels et hints ARIA partout
+   - Rôles d'accessibilité définis
+   - Support lecteur d'écran
+   - Support mise à l'échelle du texte
+   - Support clavier
+
+   Retours utilisateur :
+   - Dialogues d'alerte pour les confirmations
+   - Messages d'état vide
+   - Indicateurs de chargement
+   - Gestion des erreurs
+   - Retours de validation
+
+6. ✨ INTELLIGENCE ARTIFICIELLE - SERVICE AI (AIService.ts)
+
+   Moteur de suggestions de catégories intelligent :
+   - Analyse automatique basée sur :
+     * Correspondance de mots-clés dans le titre
+     * Reconnaissance du nom d'auteur
+     * Base de données de chefs célèbres (20+ entrées)
+     * Support des pseudonymes d'auteur
+     * Patterns de catégories des livres existants
+
+   Catégories prédéfinies :
+   - Pâtisserie
+   - Cuisine française
+   - Cuisine italienne
+   - Cuisine asiatique
+   - Végétarien
+   - Santé/Bien-être
+   - Rapide & Facile
+   - Cuisine du monde
+   - Régionale
+   - Saisonnière
+   - Barbecue & Grillades
+   - Fêtes & Occasions spéciales
+
+   Système de scoring :
+   - Score de confiance (0-1)
+   - Explication du raisonnement pour chaque suggestion
+   - Fallback vers la catégorie la plus courante de la bibliothèque
+
+
+CONTRAINTES STRICTES - RESPECT DES DROITS D'AUTEUR
+================================================================================
+
+L'application respecte scrupuleusement les droits d'auteur en ne servant que
+d'index intelligent vers les livres physiques. Elle ne contient AUCUN contenu
+protégé qui permettrait de cuisiner sans le livre original.
+
+CE QUI EST STRICTEMENT INTERDIT :
+   ❌ Liste détaillée des ingrédients avec quantités
+   ❌ Étapes de préparation/instructions de cuisine
+   ❌ Anecdotes, introductions, astuces des auteurs
+   ❌ Photos professionnelles des recettes du livre
+   ❌ Photos des pages du livre
+   ❌ Citations ou passages de texte du livre
+   ❌ Variantes détaillées proposées par l'auteur
+   ❌ Sommaire alternatif reconstituant l'organisation du livre
+   ❌ Champ structuré dédié au numéro de page
+   ❌ Import automatique de table des matières (scan/OCR)
+   ❌ Fonctionnalité "scanner le sommaire pour indexation automatique"
+   ❌ Toute reproduction de la mise en page ou design du livre
+
+CE QUI EST AUTORISÉ :
+   ✅ Nom de la recette (saisi manuellement)
+   ✅ Référence au livre source (liaison structurée)
+   ✅ Tags descriptifs génériques
+   ✅ Ingrédients principaux sous forme de tags simples (sans quantités)
+   ✅ Notes personnelles rédigées par l'utilisateur
+   ✅ Numéro de page écrit dans les notes personnelles (facultatif)
+   ✅ Informations bibliographiques factuelles
+   ✅ Photo de la couverture du livre
+   ✅ Ajout recette par recette au fur et à mesure des besoins
+   ✅ Photos personnelles des plats que vous avez cuisinés
+
+FONCTIONNALITÉS EXCLUES (par choix)
+================================================================================
+
+   ❌ Partage entre utilisateurs (contraire aux droits d'auteur)
+   ❌ Système de notation des recettes
+   ❌ Historique de préparation
+   ❌ Liste de courses générée automatiquement
+   ❌ Conversion d'unités et ajustement des portions
+   ❌ Minuteurs intégrés
+   ❌ Création de menus hebdomadaires
+
+
+ARCHITECTURE TECHNIQUE
+================================================================================
+
+Framework & Langage :
+- React Native (Expo)
+- TypeScript
+
+Navigation :
+- React Navigation (Drawer + Stack)
+- 10+ écrans avec navigation fluide
+
+Gestion d'état :
+- Context API React (AppContext)
+- Opérations CRUD complètes
+- Synchronisation en temps réel
+
+Persistance :
+- AsyncStorage pour stockage local
+- Sauvegarde automatique après mutations
+- Récupération au démarrage
+
+Services externes :
+- Google Books API (recherche de livres)
+- Scanner de code-barres intégré
+- Caméra et galerie photo
+
+Services internes :
+- AIService : Suggestions intelligentes de catégories
+- Système de thèmes multi-modes
+
+Design :
+- Interface responsive adaptative
+- Support des petits/grands écrans
+- Gestion orientation portrait/paysage
+- Système de design tokens
+- Accessibilité WCAG
+
+Modules principaux :
+- 10+ composants d'écran
+- Contexte global de données
+- Service IA personnalisé
+- Système de thèmes dynamiques
+- Gestion d'images avancée
+
+
+STATISTIQUES DU PROJET
+================================================================================
+
+Écrans : 10
+- HomeScreen (Dashboard)
+- BooksScreen (Liste livres)
+- AddBookScreen (Ajout/édition livre)
+- BookDetailScreen (Détails livre)
+- RecipesScreen (Liste recettes)
+- AddRecipeScreen (Ajout recette)
+- RecipeDetailScreen (Détails/édition recette)
+- CollectionsScreen (Liste collections)
+- CollectionDetailScreen (Détails/édition collection)
+- DrawerContent (Menu navigation)
+
+Fonctionnalités majeures : 15+
+- CRUD complet (livres, recettes, collections, tags)
+- Recherche multi-critères
+- Système de favoris
+- Collections intelligentes
+- Scan ISBN
+- Intégration Google Books API
+- Suggestions IA de catégories
+- Système de thèmes (3 thèmes)
+- Gestion d'images (caméra + galerie)
+- Persistance locale
+- Navigation drawer + stack
+- États vides personnalisés
+- Dialogues de confirmation
+- Édition en ligne
+- Support accessibilité
+
+
+OBJECTIF FINAL
+================================================================================
+
+Transformer une collection physique de livres de cuisine en base de données
+personnelle facilement consultable, tout en conservant l'expérience authentique
+de cuisiner avec le livre physique.
+
+Un système de fiches Bristol numérique, modernisé et interactif, qui reste un
+pur index intelligent : juste assez d'informations pour retrouver rapidement
+une recette dans sa collection, rien qui permette de cuisiner sans le livre.
+
+✨ L'application dépasse le simple index en offrant :
+- Une expérience utilisateur moderne et fluide
+- Des fonctionnalités d'IA pour faciliter l'organisation
+- Des collections pour regrouper les recettes par thèmes
+- Un système de recherche puissant et intuitif
+- Une interface adaptative et accessible
+- Une intégration avec les APIs externes pour simplifier l'ajout de livres
+
+Tout en respectant STRICTEMENT les droits d'auteur et en préservant la valeur
+des livres originaux.
+
+
+ÉTAT DU DÉVELOPPEMENT
+================================================================================
+
+PHASE : Prototype de démonstration 🚀
+
+Cette version démo illustre les concepts clés de l'application avec :
+✅ Navigation principale fonctionnelle (Drawer + Stack Navigation)
+✅ Interface utilisateur représentative du design final
+✅ Démo des fonctionnalités CRUD de base (livres, recettes, collections)
+✅ Recherche et filtrage fonctionnels
+✅ Système de favoris opérationnel
+✅ Exemples de données pour illustrer le concept
+✅ Design responsive adaptatif
+
+FONCTIONNALITÉS PRÉVUES POUR LA VERSION COMPLÈTE :
+🔄 Scanner de code-barres ISBN intégré
+🔄 Intégration complète de l'API Google Books
+🔄 Système d'IA pour suggestions intelligentes de catégories
+🔄 Gestion avancée des images (caméra + galerie photo)
+🔄 Système de thèmes multiples (clair/sombre/personnalisé)
+🔄 Persistance robuste avec AsyncStorage
+🔄 Validation avancée et gestion d'erreurs
+🔄 Support complet de l'accessibilité (WCAG)
+🔄 Optimisations de performance
+🔄 Tests unitaires et d'intégration
+🔄 Mode hors ligne complet
