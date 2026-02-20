@@ -26,7 +26,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { useApp } from '../contexts/AppContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { Book } from '../models/types';
-import { spacing, fontSizes, borderRadius, iconSizes, screenDimensions } from '../theme/responsive';
+import { spacing, fontSizes, borderRadius, iconSizes, screenDimensions, deviceType, getResponsiveValue } from '../theme/responsive';
 import { formatAuthorDisplay } from '../utils/formatters';
 
 type BooksScreenNavigationProp = DrawerNavigationProp<any> & NativeStackNavigationProp<RootStackParamList, 'Books'>;
@@ -42,6 +42,9 @@ export default function BooksScreen({ navigation }: Props) {
   /** État de la recherche */
   const [searchQuery, setSearchQuery] = useState('');
 
+  /** Nombre de colonnes responsive : 2 pour téléphone, 3 pour tablette, 4 pour grande tablette */
+  const numColumns = getResponsiveValue(2, 2, deviceType.isLargeTablet ? 4 : 3);
+
   /** Filtre les livres selon la recherche (titre, auteur, pseudonyme ou catégorie) */
   const filteredBooks = books.filter(book =>
     book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -49,6 +52,9 @@ export default function BooksScreen({ navigation }: Props) {
     (book.pseudonym && book.pseudonym.toLowerCase().includes(searchQuery.toLowerCase())) ||
     (book.category && book.category.toLowerCase().includes(searchQuery.toLowerCase()))
   );
+
+  /** Calcul de la largeur responsive des cartes en fonction du nombre de colonnes */
+  const cardWidth = numColumns === 2 ? '48%' : numColumns === 3 ? '31.5%' : '23.5%';
 
   const styles = StyleSheet.create({
     container: {
@@ -110,7 +116,7 @@ export default function BooksScreen({ navigation }: Props) {
       borderRadius: borderRadius.base,
       padding: spacing.sm,
       margin: spacing.xs,
-      width: '48%',
+      width: cardWidth,
       borderWidth: 1,
       borderColor: theme.card.border,
     },
@@ -246,7 +252,8 @@ export default function BooksScreen({ navigation }: Props) {
         data={filteredBooks}
         renderItem={renderBook}
         keyExtractor={item => item.id}
-        numColumns={2}
+        key={`flatlist-${numColumns}`}
+        numColumns={numColumns}
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={

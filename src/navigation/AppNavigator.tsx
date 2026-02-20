@@ -42,6 +42,7 @@ import RecipeDetailScreen from '../screens/RecipeDetailScreen';
 import CollectionsScreen from '../screens/CollectionsScreen';
 import CollectionDetailScreen from '../screens/CollectionDetailScreen';
 import DrawerContent from '../components/DrawerContent';
+import { deviceType, getResponsiveValue } from '../theme/responsive';
 
 /**
  * Type définissant toutes les routes de l'application et leurs paramètres
@@ -93,16 +94,23 @@ const Drawer = createDrawerNavigator();
  * - Contenu personnalisé (DrawerContent)
  * - Type 'front' : le drawer s'affiche au-dessus du contenu
  * - Headers masqués (gérés individuellement par chaque écran)
+ * - Largeur responsive : 240px sur téléphone, 280px sur tablette, 320px sur grande tablette
  *
  * @returns {JSX.Element} Le Drawer Navigator configuré
  */
 function MainDrawer() {
+  /** Largeur du drawer responsive selon la taille d'écran */
+  const drawerWidth = getResponsiveValue(240, 240, deviceType.isLargeTablet ? 320 : 280);
+
   return (
     <Drawer.Navigator
       drawerContent={(props) => <DrawerContent {...props} />}
       screenOptions={{
         headerShown: false,
         drawerType: 'front',
+        drawerStyle: {
+          width: drawerWidth,
+        },
       }}
     >
       <Drawer.Screen name="Home" component={HomeScreen} />
