@@ -1,21 +1,5 @@
 /**
  * src/screens/BooksScreen.tsx
- *
- * Écran d'affichage de la bibliothèque de livres de recettes.
- *
- * Fonctionnalités :
- * - Affichage en grille (2 colonnes) de tous les livres
- * - Barre de recherche pour filtrer par titre, auteur ou catégorie
- * - Affichage des couvertures d'image ou placeholder stylisé
- * - Navigation vers le détail d'un livre au clic
- * - Bouton d'ajout de nouveau livre
- * - Vue vide avec message encourageant si aucun livre
- *
- * Design :
- * - Cartes en format portrait (ratio 0.7) comme de vrais livres
- * - Images de couverture ou fond coloré avec titre si pas d'image
- * - En-tête avec menu burger et compteur de livres
- * - Recherche en temps réel
  */
 
 import React, { useState, useMemo } from 'react';
@@ -35,17 +19,38 @@ interface Props {
   navigation: BooksScreenNavigationProp;
 }
 
+/** Génère une couleur de fond déterministe à partir du titre */
+function coverColor(title: string): string {
+  const palette = [
+    ['#4A6FA5', '#2D4A78'],
+    ['#C0392B', '#922B21'],
+    ['#27AE60', '#1E8449'],
+    ['#8E44AD', '#6C3483'],
+    ['#D35400', '#A04000'],
+    ['#16A085', '#0E6655'],
+    ['#2980B9', '#1A5276'],
+    ['#F39C12', '#B7770D'],
+  ];
+  let hash = 0;
+  for (let i = 0; i < title.length; i++) hash = title.charCodeAt(i) + ((hash << 5) - hash);
+  return palette[Math.abs(hash) % palette.length][0];
+}
+
+/** Retourne les initiales du titre (max 2 mots) */
+function coverInitials(title: string): string {
+  const words = title.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
+  return (words[0][0] + words[1][0]).toUpperCase();
+}
+
 export default function BooksScreen({ navigation }: Props) {
   const { books } = useApp();
   const { theme } = useTheme();
 
-  /** État de la recherche */
   const [searchQuery, setSearchQuery] = useState('');
 
-  /** Nombre de colonnes responsive : 2 pour téléphone, 3 pour tablette, 4 pour grande tablette */
   const numColumns = getResponsiveValue(2, 2, deviceType.isLargeTablet ? 4 : 3);
 
-  /** Filtre les livres selon la recherche (titre, auteur, pseudonyme ou catégorie) */
   const filteredBooks = useMemo(() => {
     const q = searchQuery.toLowerCase();
     return books.filter(book =>
@@ -56,7 +61,6 @@ export default function BooksScreen({ navigation }: Props) {
     );
   }, [books, searchQuery]);
 
-  /** Calcul de la largeur responsive des cartes en fonction du nombre de colonnes */
   const cardWidth = numColumns === 2 ? '48%' : numColumns === 3 ? '31.5%' : '23.5%';
 
   const styles = useMemo(() => StyleSheet.create({
@@ -66,49 +70,69 @@ export default function BooksScreen({ navigation }: Props) {
     },
     header: {
       backgroundColor: theme.surface,
-      padding: spacing.base,
+      paddingHorizontal: spacing.base,
       paddingTop: spacing.sm,
+      paddingBottom: spacing.base,
       borderBottomWidth: 1,
       borderBottomColor: theme.card.border,
     },
     headerTop: {
       flexDirection: 'row',
-      justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: spacing.xs,
+      marginBottom: spacing.md,
     },
     menuButton: {
-      padding: spacing.sm,
+      width: 40,
+      height: 40,
+      borderRadius: borderRadius.round,
+      backgroundColor: theme.card.background,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.card.border,
       marginRight: spacing.md,
     },
     menuIcon: {
       fontSize: iconSizes.base,
+    },
+    headerTitleBlock: {
+      flex: 1,
     },
     headerTitle: {
       fontSize: screenDimensions.isSmallDevice ? fontSizes.xl : fontSizes.xxl,
       fontWeight: 'bold',
       color: theme.text.primary,
       fontFamily: 'serif',
-      flex: 1,
     },
     bookCount: {
-      fontSize: fontSizes.base,
-      color: theme.text.secondary,
+      fontSize: fontSizes.sm,
+      color: theme.text.tertiary,
+      fontWeight: '500',
     },
-    searchInput: {
-      backgroundColor: theme.surface,
-      padding: spacing.base,
-      margin: spacing.base,
-      marginBottom: spacing.sm,
+    searchRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.card.background,
       borderRadius: borderRadius.md,
-      fontSize: fontSizes.base,
-      color: theme.text.primary,
       borderWidth: 1,
       borderColor: theme.card.border,
+      paddingHorizontal: spacing.md,
+    },
+    searchIcon: {
+      fontSize: fontSizes.md,
+      marginRight: spacing.sm,
+      color: theme.text.tertiary,
+    },
+    searchInput: {
+      flex: 1,
+      paddingVertical: spacing.md,
+      fontSize: fontSizes.base,
+      color: theme.text.primary,
     },
     listContent: {
       paddingHorizontal: spacing.sm,
-      paddingBottom: spacing.base,
+      paddingTop: spacing.md,
+      paddingBottom: spacing.xxl + spacing.xl,
     },
     row: {
       justifyContent: 'space-between',
@@ -122,10 +146,15 @@ export default function BooksScreen({ navigation }: Props) {
       width: cardWidth,
       borderWidth: 1,
       borderColor: theme.card.border,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.06,
+      shadowRadius: 4,
+      elevation: 2,
     },
     bookCover: {
       width: '100%',
-      aspectRatio: 0.7,
+      aspectRatio: 0.68,
       borderRadius: borderRadius.md,
       marginBottom: spacing.sm,
       overflow: 'hidden',
@@ -138,26 +167,30 @@ export default function BooksScreen({ navigation }: Props) {
     placeholderCover: {
       width: '100%',
       height: '100%',
-      backgroundColor: theme.primary,
       justifyContent: 'center',
       alignItems: 'center',
       padding: spacing.sm,
     },
-    placeholderIcon: {
-      fontSize: iconSizes.xl,
-      marginBottom: spacing.sm,
+    placeholderInitials: {
+      color: '#FFFFFF',
+      fontSize: fontSizes.xxxl,
+      fontWeight: 'bold',
+      fontFamily: 'serif',
+      letterSpacing: 2,
+      opacity: 0.9,
     },
     placeholderTitle: {
-      color: theme.button.text,
+      color: 'rgba(255,255,255,0.7)',
       fontSize: fontSizes.xs,
       fontWeight: '600',
       textAlign: 'center',
+      marginTop: spacing.xs,
     },
     bookTitle: {
       fontSize: fontSizes.base,
-      fontWeight: '600',
+      fontWeight: '700',
       color: theme.text.primary,
-      marginBottom: spacing.xs,
+      marginBottom: 2,
       minHeight: screenDimensions.isSmallDevice ? 32 : 36,
     },
     bookAuthor: {
@@ -169,59 +202,85 @@ export default function BooksScreen({ navigation }: Props) {
       alignItems: 'center',
       justifyContent: 'center',
       paddingTop: spacing.xxl * 2,
+      paddingHorizontal: spacing.xl,
     },
     emptyIcon: {
-      fontSize: iconSizes.xl * 2,
+      fontSize: 64,
       marginBottom: spacing.base,
     },
     emptyText: {
       fontSize: fontSizes.lg,
-      color: theme.text.secondary,
-      fontWeight: '600',
+      color: theme.text.primary,
+      fontWeight: '700',
       marginBottom: spacing.sm,
+      textAlign: 'center',
     },
     emptySubtext: {
       fontSize: fontSizes.base,
-      color: theme.text.tertiary,
+      color: theme.text.secondary,
+      textAlign: 'center',
+      lineHeight: fontSizes.base * 1.6,
     },
-    addButton: {
+    fabButton: {
+      position: 'absolute',
+      bottom: spacing.xl,
+      right: spacing.xl,
       backgroundColor: theme.primary,
-      paddingVertical: spacing.md,
-      paddingHorizontal: spacing.lg,
-      margin: spacing.base,
-      borderRadius: borderRadius.base,
+      borderRadius: borderRadius.round,
+      width: 56,
+      height: 56,
+      justifyContent: 'center',
       alignItems: 'center',
+      shadowColor: theme.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.4,
+      shadowRadius: 8,
+      elevation: 6,
     },
-    addButtonText: {
-      color: theme.button.text,
-      fontSize: fontSizes.md,
-      fontWeight: '600',
+    fabText: {
+      color: '#FFFFFF',
+      fontSize: fontSizes.xxl,
+      fontWeight: '300',
+      lineHeight: fontSizes.xxl,
+      marginTop: -2,
     },
-  }), [theme]);
+  }), [theme, cardWidth]);
 
-  const renderBook = ({ item }: { item: Book }) => (
-    <TouchableOpacity
-      style={styles.bookCard}
-      onPress={() => navigation.navigate('BookDetail', { bookId: item.id })}
-      accessibilityLabel={`Ouvrir le livre ${item.title} de ${formatAuthorDisplay(item.author, item.pseudonym)}`}
-      accessibilityRole="button"
-    >
-      <View style={styles.bookCover}>
-        {item.coverImage ? (
-          <Image source={{ uri: item.coverImage }} style={styles.coverImage} accessible accessibilityLabel={`Couverture du livre ${item.title}`} />
-        ) : (
-          <View style={styles.placeholderCover}>
-            <Text style={styles.placeholderIcon}>📚</Text>
-            <Text style={styles.placeholderTitle} numberOfLines={3} ellipsizeMode="tail" allowFontScaling>
-              {item.title}
-            </Text>
-          </View>
-        )}
-      </View>
-      <Text style={styles.bookTitle} numberOfLines={2} ellipsizeMode="tail" allowFontScaling>{item.title}</Text>
-      <Text style={styles.bookAuthor} numberOfLines={1} ellipsizeMode="tail" allowFontScaling>{formatAuthorDisplay(item.author, item.pseudonym)}</Text>
-    </TouchableOpacity>
-  );
+  const renderBook = ({ item }: { item: Book }) => {
+    const bgColor = coverColor(item.title);
+    const initials = coverInitials(item.title);
+    return (
+      <TouchableOpacity
+        style={styles.bookCard}
+        onPress={() => navigation.navigate('BookDetail', { bookId: item.id })}
+        activeOpacity={0.8}
+        accessibilityLabel={`Ouvrir le livre ${item.title} de ${formatAuthorDisplay(item.author, item.pseudonym)}`}
+        accessibilityRole="button"
+      >
+        <View style={styles.bookCover}>
+          {item.coverImage ? (
+            <Image
+              source={{ uri: item.coverImage }}
+              style={styles.coverImage}
+              accessible
+              accessibilityLabel={`Couverture du livre ${item.title}`}
+            />
+          ) : (
+            <View style={[styles.placeholderCover, { backgroundColor: bgColor }]}>
+              <Text style={styles.placeholderInitials}>{initials}</Text>
+              <Text style={styles.placeholderTitle} numberOfLines={2} ellipsizeMode="tail">
+                {item.title}
+              </Text>
+            </View>
+          )}
+        </View>
+        <Text style={styles.bookTitle} numberOfLines={2} ellipsizeMode="tail" allowFontScaling>{item.title}</Text>
+        <Text style={styles.bookAuthor} numberOfLines={1} ellipsizeMode="tail" allowFontScaling>
+          {formatAuthorDisplay(item.author, item.pseudonym)}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -235,24 +294,33 @@ export default function BooksScreen({ navigation }: Props) {
           >
             <Text style={styles.menuIcon}>☰</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle} numberOfLines={1} ellipsizeMode="tail" allowFontScaling>Ma Bibliothèque</Text>
+          <View style={styles.headerTitleBlock}>
+            <Text style={styles.headerTitle} numberOfLines={1} ellipsizeMode="tail" allowFontScaling>
+              Ma Bibliothèque
+            </Text>
+            <Text style={styles.bookCount} allowFontScaling numberOfLines={1}>
+              {books.length} livre{books.length > 1 ? 's' : ''}
+            </Text>
+          </View>
         </View>
-        <Text style={styles.bookCount} allowFontScaling numberOfLines={1}>{books.length} livre{books.length > 1 ? 's' : ''}</Text>
-      </View>
 
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Rechercher un livre, une catégorie, auteur, ..."
-        placeholderTextColor={theme.text.tertiary}
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-        autoCapitalize="none"
-        autoCorrect={false}
-        returnKeyType="search"
-        allowFontScaling
-        accessibilityLabel="Champ de recherche"
-        accessibilityHint="Entrez un titre, auteur ou catégorie pour filtrer vos livres"
-      />
+        <View style={styles.searchRow}>
+          <Text style={styles.searchIcon}>🔍</Text>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Titre, auteur, catégorie…"
+            placeholderTextColor={theme.text.tertiary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="search"
+            allowFontScaling
+            accessibilityLabel="Champ de recherche"
+            accessibilityHint="Entrez un titre, auteur ou catégorie pour filtrer vos livres"
+          />
+        </View>
+      </View>
 
       <FlatList
         data={filteredBooks}
@@ -262,22 +330,26 @@ export default function BooksScreen({ navigation }: Props) {
         numColumns={numColumns}
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyIcon}>📚</Text>
-            <Text style={styles.emptyText} allowFontScaling>Aucun livre pour le moment</Text>
-            <Text style={styles.emptySubtext} allowFontScaling>Commencez votre bibliothèque !</Text>
+            <Text style={styles.emptyText} allowFontScaling>Votre bibliothèque est vide</Text>
+            <Text style={styles.emptySubtext} allowFontScaling>
+              Ajoutez votre premier livre de cuisine via le bouton + ci-dessous.
+            </Text>
           </View>
         }
       />
 
       <TouchableOpacity
-        style={styles.addButton}
+        style={styles.fabButton}
         onPress={() => navigation.navigate('AddBook')}
         accessibilityLabel="Ajouter un nouveau livre"
         accessibilityRole="button"
+        activeOpacity={0.85}
       >
-        <Text style={styles.addButtonText} allowFontScaling>+ Ajouter un livre</Text>
+        <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
     </View>
   );

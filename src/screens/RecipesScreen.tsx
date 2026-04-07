@@ -1,23 +1,5 @@
 /**
  * src/screens/RecipesScreen.tsx
- *
- * Écran d'affichage de la liste des recettes.
- *
- * Fonctionnalités :
- * - Liste complète de toutes les recettes
- * - Recherche par nom de recette ou tags
- * - Filtre pour afficher uniquement les favoris
- * - Toggle favori directement depuis la liste (étoile)
- * - Affichage du livre source de chaque recette
- * - Aperçu des tags (3 premiers + compteur)
- * - Navigation vers le détail au clic
- * - Bouton d'ajout de nouvelle recette
- *
- * Design :
- * - Cartes avec nom, livre source et tags
- * - Icône étoile interactive pour les favoris
- * - Bouton de filtre toggle (toutes/favoris)
- * - Recherche en temps réel
  */
 
 import React, { useState, useMemo } from 'react';
@@ -40,13 +22,9 @@ export default function RecipesScreen({ navigation }: Props) {
   const { recipes, books, toggleFavorite } = useApp();
   const { theme } = useTheme();
 
-  /** État de la recherche */
   const [searchQuery, setSearchQuery] = useState('');
-
-  /** État du filtre favoris */
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
-  /** Filtre les recettes selon la recherche et le filtre favoris */
   const filteredRecipes = useMemo(() => {
     const q = searchQuery.toLowerCase();
     return recipes.filter(recipe => {
@@ -57,14 +35,10 @@ export default function RecipesScreen({ navigation }: Props) {
     });
   }, [recipes, searchQuery, showFavoritesOnly]);
 
-  /**
-   * Retourne le titre du livre source d'une recette
-   * @param bookId - ID du livre ou undefined pour recettes personnelles
-   */
   const getBookTitle = (bookId?: string) => {
-    if (!bookId) return 'Recette personnelle';
+    if (!bookId) return null;
     const book = books.find(b => b.id === bookId);
-    return book ? book.title : 'Livre inconnu';
+    return book ? book.title : null;
   };
 
   const styles = useMemo(() => StyleSheet.create({
@@ -74,106 +48,167 @@ export default function RecipesScreen({ navigation }: Props) {
     },
     header: {
       backgroundColor: theme.surface,
-      padding: spacing.base,
+      paddingHorizontal: spacing.base,
       paddingTop: spacing.sm,
+      paddingBottom: spacing.base,
       borderBottomWidth: 1,
       borderBottomColor: theme.card.border,
+    },
+    headerRow: {
       flexDirection: 'row',
       alignItems: 'center',
+      marginBottom: spacing.md,
     },
     menuButton: {
-      padding: spacing.sm,
+      width: 40,
+      height: 40,
+      borderRadius: borderRadius.round,
+      backgroundColor: theme.card.background,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.card.border,
       marginRight: spacing.md,
     },
     menuIcon: {
       fontSize: iconSizes.base,
+    },
+    headerTitleBlock: {
+      flex: 1,
     },
     headerTitle: {
       fontSize: screenDimensions.isSmallDevice ? fontSizes.xl : fontSizes.xxl,
       fontWeight: 'bold',
       color: theme.text.primary,
       fontFamily: 'serif',
-      flex: 1,
     },
-    searchInput: {
-      backgroundColor: theme.surface,
-      padding: spacing.base,
-      margin: spacing.base,
-      marginBottom: spacing.sm,
+    recipeCount: {
+      fontSize: fontSizes.sm,
+      color: theme.text.tertiary,
+      fontWeight: '500',
+    },
+    searchRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.card.background,
       borderRadius: borderRadius.md,
-      fontSize: fontSizes.base,
-      color: theme.text.primary,
       borderWidth: 1,
       borderColor: theme.card.border,
-    },
-    filterContainer: {
-      flexDirection: 'row',
-      marginHorizontal: spacing.base,
+      paddingHorizontal: spacing.md,
       marginBottom: spacing.sm,
+    },
+    searchIcon: {
+      fontSize: fontSizes.md,
+      marginRight: spacing.sm,
+      color: theme.text.tertiary,
+    },
+    searchInput: {
+      flex: 1,
+      paddingVertical: spacing.md,
+      fontSize: fontSizes.base,
+      color: theme.text.primary,
+    },
+    filterRow: {
+      flexDirection: 'row',
       gap: spacing.sm,
     },
-    filterButton: {
-      flex: 1,
-      backgroundColor: theme.card.background,
-      paddingVertical: spacing.md,
-      paddingHorizontal: spacing.sm,
-      borderRadius: borderRadius.md,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 2,
-      borderColor: theme.card.border,
+    filterPill: {
       flexDirection: 'row',
+      alignItems: 'center',
       gap: spacing.xs,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.md,
+      borderRadius: borderRadius.round,
+      borderWidth: 1.5,
+      borderColor: theme.card.border,
+      backgroundColor: 'transparent',
     },
-    filterButtonActive: {
+    filterPillActive: {
       backgroundColor: theme.primary,
       borderColor: theme.primary,
     },
-    filterButtonText: {
-      fontSize: fontSizes.base,
+    filterPillText: {
+      fontSize: fontSizes.sm,
       color: theme.text.secondary,
       fontWeight: '600',
     },
-    filterButtonTextActive: {
-      color: theme.button.text,
-      fontWeight: 'bold',
+    filterPillTextActive: {
+      color: '#FFFFFF',
     },
-    filterIcon: {
-      fontSize: fontSizes.md,
+    filterPillIcon: {
+      fontSize: fontSizes.sm,
+    },
+    listContent: {
+      paddingTop: spacing.md,
+      paddingBottom: spacing.xxl + spacing.xl,
     },
     recipeCard: {
       backgroundColor: theme.card.background,
-      padding: spacing.base,
       marginHorizontal: spacing.base,
       marginBottom: spacing.sm,
       borderRadius: borderRadius.base,
       borderWidth: 1,
       borderColor: theme.card.border,
+      overflow: 'hidden',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 3,
+      elevation: 1,
     },
-    recipeInfo: {
-      flex: 1,
+    recipeCardFavorite: {
+      borderColor: theme.primary,
+    },
+    recipeAccentBar: {
+      height: 3,
+      backgroundColor: theme.card.border,
+    },
+    recipeAccentBarFavorite: {
+      backgroundColor: theme.primary,
+    },
+    recipeCardContent: {
+      padding: spacing.base,
     },
     recipeHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      alignItems: 'center',
+      alignItems: 'flex-start',
       marginBottom: spacing.xs,
     },
     recipeName: {
-      fontSize: fontSizes.lg,
-      fontWeight: '600',
+      fontSize: fontSizes.md,
+      fontWeight: '700',
       color: theme.text.primary,
       flex: 1,
       flexShrink: 1,
+      lineHeight: fontSizes.md * 1.3,
+    },
+    favoriteButton: {
+      paddingLeft: spacing.sm,
+      paddingTop: 2,
     },
     favoriteIcon: {
       fontSize: iconSizes.base,
-      marginLeft: spacing.sm,
+    },
+    bookSourceRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+      marginBottom: spacing.sm,
+    },
+    bookSourceIcon: {
+      fontSize: fontSizes.sm,
     },
     bookSource: {
-      fontSize: fontSizes.base,
+      fontSize: fontSizes.sm,
       color: theme.text.secondary,
-      marginBottom: spacing.sm,
+      fontStyle: 'italic',
+      flexShrink: 1,
+    },
+    personalBadge: {
+      fontSize: fontSizes.xs,
+      color: theme.text.tertiary,
+      fontStyle: 'italic',
     },
     tagsContainer: {
       flexDirection: 'row',
@@ -184,147 +219,217 @@ export default function RecipesScreen({ navigation }: Props) {
     tag: {
       backgroundColor: theme.tag.background,
       paddingHorizontal: spacing.sm,
-      paddingVertical: spacing.xs,
-      borderRadius: borderRadius.md,
+      paddingVertical: 4,
+      borderRadius: borderRadius.round,
     },
     tagText: {
-      fontSize: fontSizes.sm,
+      fontSize: fontSizes.xs,
       color: theme.tag.text,
+      fontWeight: '600',
     },
     moreTagsText: {
-      fontSize: fontSizes.sm,
+      fontSize: fontSizes.xs,
       color: theme.text.tertiary,
-      marginLeft: spacing.xs,
+      fontWeight: '600',
+    },
+    emptyContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingTop: spacing.xxl * 2,
+      paddingHorizontal: spacing.xl,
+    },
+    emptyIcon: {
+      fontSize: 64,
+      marginBottom: spacing.base,
     },
     emptyText: {
+      fontSize: fontSizes.lg,
+      color: theme.text.primary,
+      fontWeight: '700',
+      marginBottom: spacing.sm,
       textAlign: 'center',
-      marginTop: spacing.xxl * 2,
-      fontSize: fontSizes.md,
-      color: theme.text.tertiary,
     },
-    addButton: {
+    emptySubtext: {
+      fontSize: fontSizes.base,
+      color: theme.text.secondary,
+      textAlign: 'center',
+      lineHeight: fontSizes.base * 1.6,
+    },
+    fabButton: {
+      position: 'absolute',
+      bottom: spacing.xl,
+      right: spacing.xl,
       backgroundColor: theme.primary,
-      paddingVertical: spacing.md,
-      paddingHorizontal: spacing.lg,
-      margin: spacing.base,
-      borderRadius: borderRadius.base,
+      borderRadius: borderRadius.round,
+      width: 56,
+      height: 56,
+      justifyContent: 'center',
       alignItems: 'center',
+      shadowColor: theme.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.4,
+      shadowRadius: 8,
+      elevation: 6,
     },
-    addButtonText: {
-      color: theme.button.text,
-      fontSize: fontSizes.md,
-      fontWeight: '600',
+    fabText: {
+      color: '#FFFFFF',
+      fontSize: fontSizes.xxl,
+      fontWeight: '300',
+      lineHeight: fontSizes.xxl,
+      marginTop: -2,
     },
   }), [theme]);
 
-  const renderRecipe = ({ item }: { item: Recipe }) => (
-    <TouchableOpacity
-      style={styles.recipeCard}
-      onPress={() => navigation.navigate('RecipeDetail', { recipeId: item.id })}
-      accessibilityLabel={`Ouvrir la recette ${item.name} du livre ${getBookTitle(item.bookId)}`}
-      accessibilityRole="button"
-    >
-      <View style={styles.recipeInfo}>
-        <View style={styles.recipeHeader}>
-          <Text style={styles.recipeName} numberOfLines={2} ellipsizeMode="tail" allowFontScaling>{item.name}</Text>
-          <TouchableOpacity
-            onPress={() => toggleFavorite(item.id)}
-            accessibilityLabel={item.isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
-            accessibilityRole="button"
-          >
-            <Text style={styles.favoriteIcon}>
-              {item.isFavorite ? '⭐' : '☆'}
+  const renderRecipe = ({ item }: { item: Recipe }) => {
+    const bookTitle = getBookTitle(item.bookId);
+    return (
+      <TouchableOpacity
+        style={[styles.recipeCard, item.isFavorite && styles.recipeCardFavorite]}
+        onPress={() => navigation.navigate('RecipeDetail', { recipeId: item.id })}
+        activeOpacity={0.8}
+        accessibilityLabel={`Ouvrir la recette ${item.name}`}
+        accessibilityRole="button"
+      >
+        <View style={[styles.recipeAccentBar, item.isFavorite && styles.recipeAccentBarFavorite]} />
+        <View style={styles.recipeCardContent}>
+          <View style={styles.recipeHeader}>
+            <Text style={styles.recipeName} numberOfLines={2} ellipsizeMode="tail" allowFontScaling>
+              {item.name}
             </Text>
-          </TouchableOpacity>
-        </View>
-        <Text style={styles.bookSource} numberOfLines={1} ellipsizeMode="tail" allowFontScaling>{getBookTitle(item.bookId)}</Text>
-        {item.tags.length > 0 && (
-          <View style={styles.tagsContainer}>
-            {item.tags.slice(0, 3).map((tag) => (
-              <View key={tag} style={styles.tag}>
-                <Text style={styles.tagText} numberOfLines={1} ellipsizeMode="tail" allowFontScaling>{tag}</Text>
-              </View>
-            ))}
-            {item.tags.length > 3 && (
-              <Text style={styles.moreTagsText} allowFontScaling>+{item.tags.length - 3}</Text>
-            )}
+            <TouchableOpacity
+              style={styles.favoriteButton}
+              onPress={() => toggleFavorite(item.id)}
+              accessibilityLabel={item.isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+              accessibilityRole="button"
+            >
+              <Text style={styles.favoriteIcon}>{item.isFavorite ? '⭐' : '☆'}</Text>
+            </TouchableOpacity>
           </View>
-        )}
-      </View>
-    </TouchableOpacity>
-  );
+
+          {bookTitle ? (
+            <View style={styles.bookSourceRow}>
+              <Text style={styles.bookSourceIcon}>📖</Text>
+              <Text style={styles.bookSource} numberOfLines={1} ellipsizeMode="tail" allowFontScaling>
+                {bookTitle}
+              </Text>
+            </View>
+          ) : (
+            <Text style={styles.personalBadge} allowFontScaling>Recette personnelle</Text>
+          )}
+
+          {item.tags.length > 0 && (
+            <View style={styles.tagsContainer}>
+              {item.tags.slice(0, 4).map((tag) => (
+                <View key={tag} style={styles.tag}>
+                  <Text style={styles.tagText} numberOfLines={1} ellipsizeMode="tail" allowFontScaling>{tag}</Text>
+                </View>
+              ))}
+              {item.tags.length > 4 && (
+                <Text style={styles.moreTagsText} allowFontScaling>+{item.tags.length - 4}</Text>
+              )}
+            </View>
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.menuButton}
-          onPress={() => navigation.openDrawer()}
-          accessibilityLabel="Ouvrir le menu de navigation"
-          accessibilityRole="button"
-        >
-          <Text style={styles.menuIcon}>☰</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle} numberOfLines={1} ellipsizeMode="tail" allowFontScaling>Mes Recettes</Text>
-      </View>
+        <View style={styles.headerRow}>
+          <TouchableOpacity
+            style={styles.menuButton}
+            onPress={() => navigation.openDrawer()}
+            accessibilityLabel="Ouvrir le menu de navigation"
+            accessibilityRole="button"
+          >
+            <Text style={styles.menuIcon}>☰</Text>
+          </TouchableOpacity>
+          <View style={styles.headerTitleBlock}>
+            <Text style={styles.headerTitle} numberOfLines={1} ellipsizeMode="tail" allowFontScaling>
+              Mes Recettes
+            </Text>
+            <Text style={styles.recipeCount} allowFontScaling numberOfLines={1}>
+              {recipes.length} recette{recipes.length > 1 ? 's' : ''}
+            </Text>
+          </View>
+        </View>
 
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Rechercher par nom ou tag..."
-        placeholderTextColor={theme.text.tertiary}
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-        autoCapitalize="none"
-        autoCorrect={false}
-        returnKeyType="search"
-        allowFontScaling
-        accessibilityLabel="Champ de recherche"
-        accessibilityHint="Entrez un nom de recette ou un tag pour filtrer vos recettes"
-      />
+        <View style={styles.searchRow}>
+          <Text style={styles.searchIcon}>🔍</Text>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Nom, tag…"
+            placeholderTextColor={theme.text.tertiary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="search"
+            allowFontScaling
+            accessibilityLabel="Champ de recherche"
+            accessibilityHint="Entrez un nom de recette ou un tag pour filtrer"
+          />
+        </View>
 
-      <View style={styles.filterContainer}>
-        <TouchableOpacity
-          style={[styles.filterButton, !showFavoritesOnly && styles.filterButtonActive]}
-          onPress={() => setShowFavoritesOnly(false)}
-          accessibilityLabel="Afficher toutes les recettes"
-          accessibilityRole="button"
-          accessibilityState={{ selected: !showFavoritesOnly }}
-        >
-          <Text style={[styles.filterIcon, !showFavoritesOnly && styles.filterButtonTextActive]}>📚</Text>
-          <Text style={[styles.filterButtonText, !showFavoritesOnly && styles.filterButtonTextActive]} allowFontScaling numberOfLines={1} ellipsizeMode="tail">
-            Toutes
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterButton, showFavoritesOnly && styles.filterButtonActive]}
-          onPress={() => setShowFavoritesOnly(true)}
-          accessibilityLabel="Afficher uniquement les favoris"
-          accessibilityRole="button"
-          accessibilityState={{ selected: showFavoritesOnly }}
-        >
-          <Text style={[styles.filterIcon, showFavoritesOnly && styles.filterButtonTextActive]}>⭐</Text>
-          <Text style={[styles.filterButtonText, showFavoritesOnly && styles.filterButtonTextActive]} allowFontScaling numberOfLines={1} ellipsizeMode="tail">
-            Favoris
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.filterRow}>
+          <TouchableOpacity
+            style={[styles.filterPill, !showFavoritesOnly && styles.filterPillActive]}
+            onPress={() => setShowFavoritesOnly(false)}
+            accessibilityLabel="Afficher toutes les recettes"
+            accessibilityRole="button"
+            accessibilityState={{ selected: !showFavoritesOnly }}
+          >
+            <Text style={styles.filterPillIcon}>📋</Text>
+            <Text style={[styles.filterPillText, !showFavoritesOnly && styles.filterPillTextActive]} allowFontScaling numberOfLines={1}>
+              Toutes
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.filterPill, showFavoritesOnly && styles.filterPillActive]}
+            onPress={() => setShowFavoritesOnly(true)}
+            accessibilityLabel="Afficher uniquement les favoris"
+            accessibilityRole="button"
+            accessibilityState={{ selected: showFavoritesOnly }}
+          >
+            <Text style={styles.filterPillIcon}>⭐</Text>
+            <Text style={[styles.filterPillText, showFavoritesOnly && styles.filterPillTextActive]} allowFontScaling numberOfLines={1}>
+              Favoris
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <FlatList
         data={filteredRecipes}
         renderItem={renderRecipe}
         keyExtractor={item => item.id}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          <Text style={styles.emptyText} allowFontScaling>Aucune recette pour le moment</Text>
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyIcon}>{showFavoritesOnly ? '⭐' : '🍳'}</Text>
+            <Text style={styles.emptyText} allowFontScaling>
+              {showFavoritesOnly ? 'Aucun favori' : 'Aucune recette'}
+            </Text>
+            <Text style={styles.emptySubtext} allowFontScaling>
+              {showFavoritesOnly
+                ? 'Marquez des recettes en favori avec ⭐ pour les retrouver ici.'
+                : 'Ajoutez votre première recette via le bouton + ci-dessous.'}
+            </Text>
+          </View>
         }
       />
 
       <TouchableOpacity
-        style={styles.addButton}
+        style={styles.fabButton}
         onPress={() => navigation.navigate('AddRecipe')}
         accessibilityLabel="Ajouter une nouvelle recette"
         accessibilityRole="button"
+        activeOpacity={0.85}
       >
-        <Text style={styles.addButtonText} allowFontScaling>+ Ajouter une recette</Text>
+        <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
     </View>
   );
