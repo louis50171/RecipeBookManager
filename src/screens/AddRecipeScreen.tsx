@@ -25,7 +25,7 @@
  * - Boutons d'action en bas (Annuler/Enregistrer)
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Image } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -150,7 +150,7 @@ export default function AddRecipeScreen({ navigation }: Props) {
     navigation.goBack();
   };
 
-  const styles = StyleSheet.create({
+  const styles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: theme.background,
@@ -310,7 +310,7 @@ export default function AddRecipeScreen({ navigation }: Props) {
       color: theme.text.secondary,
       fontSize: fontSizes.base,
     },
-  });
+  }), [theme]);
 
   return (
     <ScrollView style={styles.container}>

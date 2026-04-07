@@ -15,7 +15,7 @@
  * - En-tête avec menu burger et compteur
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Alert, ScrollView } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
@@ -71,7 +71,7 @@ export default function CollectionsScreen({ navigation }: Props) {
     }
   };
 
-  const styles = StyleSheet.create({
+  const styles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: theme.background,
@@ -289,7 +289,7 @@ export default function CollectionsScreen({ navigation }: Props) {
       fontSize: fontSizes.md,
       fontWeight: '600',
     },
-  });
+  }), [theme]);
 
   const renderCollection = ({ item }: { item: Collection }) => (
     <TouchableOpacity

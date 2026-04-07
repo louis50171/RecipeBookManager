@@ -120,10 +120,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
    */
   const loadData = async () => {
     const [loadedBooks, loadedRecipes, loadedTags, loadedCollections] = await Promise.all([
-      storage.getBooks(),
-      storage.getRecipes(),
-      storage.getTags(),
-      storage.getCollections(),
+      storage.getBooks().catch(() => [] as Book[]),
+      storage.getRecipes().catch(() => [] as Recipe[]),
+      storage.getTags().catch(() => [] as string[]),
+      storage.getCollections().catch(() => [] as Collection[]),
     ]);
     setBooks(loadedBooks);
     setRecipes(loadedRecipes);
@@ -190,7 +190,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     await storage.saveRecipe(recipe);
     // Ajouter les nouveaux tags automatiquement
     for (const tag of recipe.tags) {
-      if (!tags.includes(tag)) {
+      if (tag.trim() && !tags.includes(tag)) {
         await storage.addTag(tag);
       }
     }
@@ -208,7 +208,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     await storage.updateRecipe(recipe);
     // Ajouter les nouveaux tags automatiquement
     for (const tag of recipe.tags) {
-      if (!tags.includes(tag)) {
+      if (tag.trim() && !tags.includes(tag)) {
         await storage.addTag(tag);
       }
     }

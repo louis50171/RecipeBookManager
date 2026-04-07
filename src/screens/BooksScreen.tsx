@@ -18,7 +18,7 @@
  * - Recherche en temps réel
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Image } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
@@ -46,17 +46,20 @@ export default function BooksScreen({ navigation }: Props) {
   const numColumns = getResponsiveValue(2, 2, deviceType.isLargeTablet ? 4 : 3);
 
   /** Filtre les livres selon la recherche (titre, auteur, pseudonyme ou catégorie) */
-  const filteredBooks = books.filter(book =>
-    book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (book.pseudonym && book.pseudonym.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (book.category && book.category.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredBooks = useMemo(() => {
+    const q = searchQuery.toLowerCase();
+    return books.filter(book =>
+      book.title.toLowerCase().includes(q) ||
+      book.author.toLowerCase().includes(q) ||
+      (book.pseudonym && book.pseudonym.toLowerCase().includes(q)) ||
+      (book.category && book.category.toLowerCase().includes(q))
+    );
+  }, [books, searchQuery]);
 
   /** Calcul de la largeur responsive des cartes en fonction du nombre de colonnes */
   const cardWidth = numColumns === 2 ? '48%' : numColumns === 3 ? '31.5%' : '23.5%';
 
-  const styles = StyleSheet.create({
+  const styles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: theme.background,
@@ -194,7 +197,7 @@ export default function BooksScreen({ navigation }: Props) {
       fontSize: fontSizes.md,
       fontWeight: '600',
     },
-  });
+  }), [theme]);
 
   const renderBook = ({ item }: { item: Book }) => (
     <TouchableOpacity
@@ -243,6 +246,9 @@ export default function BooksScreen({ navigation }: Props) {
         placeholderTextColor={theme.text.tertiary}
         value={searchQuery}
         onChangeText={setSearchQuery}
+        autoCapitalize="none"
+        autoCorrect={false}
+        returnKeyType="search"
         allowFontScaling
         accessibilityLabel="Champ de recherche"
         accessibilityHint="Entrez un titre, auteur ou catégorie pour filtrer vos livres"

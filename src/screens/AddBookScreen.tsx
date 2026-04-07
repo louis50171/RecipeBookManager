@@ -26,7 +26,7 @@
  * - Prévisualisation de l'image de couverture
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, ActivityIndicator, FlatList, Image, Modal } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
@@ -87,11 +87,18 @@ export default function AddBookScreen({ navigation, route }: Props) {
 
   const [showScanner, setShowScanner] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
-  const [scanned, setScanned] = useState(false);
+  const scannedRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
 
   const handleBarcodeScanned = ({ data }: { data: string }) => {
-    if (!scanned) {
-      setScanned(true);
+    if (!scannedRef.current) {
+      scannedRef.current = true;
       setShowScanner(false);
       setIsbn(data);
       setSearchMode('isbn');
@@ -103,7 +110,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
     if (!permission) {
       const { status } = await requestPermission();
       if (status === 'granted') {
-        setScanned(false);
+        scannedRef.current = false;
         setShowScanner(true);
       } else {
         Alert.alert('Permission refusée', 'L\'accès à la caméra est nécessaire pour scanner les codes-barres.');
@@ -111,13 +118,13 @@ export default function AddBookScreen({ navigation, route }: Props) {
     } else if (!permission.granted) {
       const { status } = await requestPermission();
       if (status === 'granted') {
-        setScanned(false);
+        scannedRef.current = false;
         setShowScanner(true);
       } else {
         Alert.alert('Permission refusée', 'L\'accès à la caméra est nécessaire pour scanner les codes-barres.');
       }
     } else {
-      setScanned(false);
+      scannedRef.current = false;
       setShowScanner(true);
     }
   };
@@ -130,7 +137,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [2, 3],
       quality: 0.8,
@@ -234,25 +241,28 @@ export default function AddBookScreen({ navigation, route }: Props) {
   };
 
   const searchByISBNWithData = async (isbnData: string) => {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = new AbortController();
     setIsSearching(true);
     try {
       const response = await fetch(
-        `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbnData.trim()}`
+        `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbnData.trim()}`,
+        { signal: abortControllerRef.current.signal }
       );
       const data = await response.json();
 
       if (data.items && data.items.length > 0) {
-        // Activer la vérification pour les recherches ISBN
         fillBookData(data.items[0].volumeInfo, true);
       } else {
         Alert.alert('Non trouvé', 'Aucun livre trouvé avec cet ISBN. Essayez la recherche par titre.');
       }
-    } catch (error) {
-      Alert.alert('Erreur', 'Impossible de rechercher le livre. Vérifiez votre connexion internet.');
-      console.error('ISBN search error:', error);
+    } catch (error: any) {
+      if (error?.name !== 'AbortError') {
+        Alert.alert('Erreur', 'Impossible de rechercher le livre. Vérifiez votre connexion internet.');
+        console.error('ISBN search error:', error);
+      }
     } finally {
       setIsSearching(false);
-      setScanned(false);
     }
   };
 
@@ -270,10 +280,13 @@ export default function AddBookScreen({ navigation, route }: Props) {
       return;
     }
 
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = new AbortController();
     setIsSearching(true);
     try {
       const response = await fetch(
-        `https://www.googleapis.com/books/v1/volumes?q=intitle:${encodeURIComponent(searchTitle.trim())}+subject:cooking&maxResults=10`
+        `https://www.googleapis.com/books/v1/volumes?q=intitle:${encodeURIComponent(searchTitle.trim())}+subject:cooking&maxResults=10`,
+        { signal: abortControllerRef.current.signal }
       );
       const data = await response.json();
 
@@ -283,9 +296,11 @@ export default function AddBookScreen({ navigation, route }: Props) {
         Alert.alert('Non trouvé', 'Aucun livre de cuisine trouvé avec ce titre. Vous pouvez saisir les informations manuellement.');
         setSearchResults([]);
       }
-    } catch (error) {
-      Alert.alert('Erreur', 'Impossible de rechercher le livre. Vérifiez votre connexion internet.');
-      console.error('Title search error:', error);
+    } catch (error: any) {
+      if (error?.name !== 'AbortError') {
+        Alert.alert('Erreur', 'Impossible de rechercher le livre. Vérifiez votre connexion internet.');
+        console.error('Title search error:', error);
+      }
     } finally {
       setIsSearching(false);
     }
@@ -297,10 +312,13 @@ export default function AddBookScreen({ navigation, route }: Props) {
       return;
     }
 
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = new AbortController();
     setIsSearching(true);
     try {
       const response = await fetch(
-        `https://www.googleapis.com/books/v1/volumes?q=inauthor:${encodeURIComponent(searchAuthor.trim())}+subject:cooking&maxResults=15`
+        `https://www.googleapis.com/books/v1/volumes?q=inauthor:${encodeURIComponent(searchAuthor.trim())}+subject:cooking&maxResults=15`,
+        { signal: abortControllerRef.current.signal }
       );
       const data = await response.json();
 
@@ -310,9 +328,11 @@ export default function AddBookScreen({ navigation, route }: Props) {
         Alert.alert('Non trouvé', 'Aucun livre de cuisine trouvé pour cet auteur. Vous pouvez saisir les informations manuellement.');
         setSearchResults([]);
       }
-    } catch (error) {
-      Alert.alert('Erreur', 'Impossible de rechercher le livre. Vérifiez votre connexion internet.');
-      console.error('Author search error:', error);
+    } catch (error: any) {
+      if (error?.name !== 'AbortError') {
+        Alert.alert('Erreur', 'Impossible de rechercher le livre. Vérifiez votre connexion internet.');
+        console.error('Author search error:', error);
+      }
     } finally {
       setIsSearching(false);
     }
@@ -345,6 +365,12 @@ export default function AddBookScreen({ navigation, route }: Props) {
       return;
     }
 
+    const parsedYear = year.trim() ? parseInt(year.trim(), 10) : undefined;
+    if (parsedYear !== undefined && (isNaN(parsedYear) || parsedYear < 1000 || parsedYear > new Date().getFullYear() + 1)) {
+      Alert.alert('Erreur', 'L\'année doit être un nombre valide (ex: 2024)');
+      return;
+    }
+
     if (isEditing && editingBook) {
       const updatedBook: Book = {
         ...editingBook,
@@ -352,7 +378,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
         author: author.trim(),
         pseudonym: pseudonym.trim() || undefined,
         editor: editor.trim() || undefined,
-        year: year.trim() ? parseInt(year) : undefined,
+        year: parsedYear,
         category: category.trim() || undefined,
         coverImage: coverImage.trim() || undefined,
       };
@@ -364,7 +390,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
         author: author.trim(),
         pseudonym: pseudonym.trim() || undefined,
         editor: editor.trim() || undefined,
-        year: year.trim() ? parseInt(year) : undefined,
+        year: parsedYear,
         category: category.trim() || undefined,
         coverImage: coverImage.trim() || undefined,
         createdAt: new Date().toISOString(),
@@ -426,7 +452,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
     );
   };
 
-  const styles = StyleSheet.create({
+  const styles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: theme.background,
@@ -830,7 +856,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
       fontSize: fontSizes.sm,
       color: theme.text.secondary,
     },
-  });
+  }), [theme]);
 
   return (
     <ScrollView style={styles.container}>
@@ -983,6 +1009,8 @@ export default function AddBookScreen({ navigation, route }: Props) {
                     onChangeText={setSearchTitle}
                     placeholder="Ex: La cuisine de référence"
                     placeholderTextColor={theme.text.tertiary}
+                    autoCapitalize="none"
+                    autoCorrect={false}
                     accessibilityLabel="Champ de saisie du titre"
                     accessibilityHint="Entrez le titre du livre à rechercher"
                     allowFontScaling={false}
@@ -1028,6 +1056,8 @@ export default function AddBookScreen({ navigation, route }: Props) {
                     onChangeText={setSearchAuthor}
                     placeholder="Ex: Philippe Etchebest"
                     placeholderTextColor={theme.text.tertiary}
+                    autoCapitalize="none"
+                    autoCorrect={false}
                     accessibilityLabel="Champ de saisie de l'auteur"
                     accessibilityHint="Entrez le nom de l'auteur à rechercher"
                     allowFontScaling={false}
@@ -1182,6 +1212,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
           onChangeText={setTitle}
           placeholder="Titre du livre"
           placeholderTextColor={theme.text.tertiary}
+          autoCapitalize="words"
           accessibilityLabel="Champ de saisie du titre"
           accessibilityHint="Entrez le titre du livre (obligatoire)"
           allowFontScaling={false}
@@ -1201,6 +1232,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
           onChangeText={setAuthor}
           placeholder="Nom de l'auteur"
           placeholderTextColor={theme.text.tertiary}
+          autoCapitalize="words"
           accessibilityLabel="Champ de saisie de l'auteur"
           accessibilityHint="Entrez le nom de l'auteur (obligatoire)"
           allowFontScaling={false}
@@ -1220,6 +1252,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
           onChangeText={setPseudonym}
           placeholder="Ex: Gastronogeek, Chef Damien..."
           placeholderTextColor={theme.text.tertiary}
+          autoCapitalize="words"
           accessibilityLabel="Champ de saisie du pseudonyme"
           accessibilityHint="Entrez le pseudonyme de l'auteur (optionnel)"
           allowFontScaling={false}
@@ -1239,6 +1272,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
           onChangeText={setEditor}
           placeholder="Maison d'édition"
           placeholderTextColor={theme.text.tertiary}
+          autoCapitalize="words"
           accessibilityLabel="Champ de saisie de l'éditeur"
           accessibilityHint="Entrez la maison d'édition (optionnel)"
           allowFontScaling={false}
@@ -1298,6 +1332,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
           onChangeText={setCategory}
           placeholder="Cuisine du monde, Pâtisserie..."
           placeholderTextColor={theme.text.tertiary}
+          autoCapitalize="sentences"
           accessibilityLabel="Champ de saisie de la catégorie"
           accessibilityHint="Entrez la catégorie du livre (optionnel)"
           allowFontScaling={false}

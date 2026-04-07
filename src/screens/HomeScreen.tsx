@@ -21,7 +21,7 @@
  * - Disposition responsive et espacements harmonieux
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
@@ -55,7 +55,7 @@ export default function HomeScreen({ navigation }: Props) {
   /** Calcule le nombre de recettes favorites pour les statistiques */
   const favoriteRecipes = recipes.filter(r => r.isFavorite);
 
-  const styles = StyleSheet.create({
+  const styles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: theme.background,
@@ -189,7 +189,7 @@ export default function HomeScreen({ navigation }: Props) {
       fontSize: iconSizes.sm,
       color: theme.text.tertiary,
     },
-  });
+  }), [theme]);
 
   return (
     <View style={styles.container}>

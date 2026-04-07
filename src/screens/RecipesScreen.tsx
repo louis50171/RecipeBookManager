@@ -20,7 +20,7 @@
  * - Recherche en temps réel
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
@@ -47,14 +47,15 @@ export default function RecipesScreen({ navigation }: Props) {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
   /** Filtre les recettes selon la recherche et le filtre favoris */
-  const filteredRecipes = recipes.filter(recipe => {
-    const matchesSearch = recipe.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      recipe.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-
-    const matchesFavorites = !showFavoritesOnly || recipe.isFavorite;
-
-    return matchesSearch && matchesFavorites;
-  });
+  const filteredRecipes = useMemo(() => {
+    const q = searchQuery.toLowerCase();
+    return recipes.filter(recipe => {
+      const matchesSearch = recipe.name.toLowerCase().includes(q) ||
+        recipe.tags.some(tag => tag.toLowerCase().includes(q));
+      const matchesFavorites = !showFavoritesOnly || recipe.isFavorite;
+      return matchesSearch && matchesFavorites;
+    });
+  }, [recipes, searchQuery, showFavoritesOnly]);
 
   /**
    * Retourne le titre du livre source d'une recette
@@ -66,7 +67,7 @@ export default function RecipesScreen({ navigation }: Props) {
     return book ? book.title : 'Livre inconnu';
   };
 
-  const styles = StyleSheet.create({
+  const styles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: theme.background,
@@ -214,7 +215,7 @@ export default function RecipesScreen({ navigation }: Props) {
       fontSize: fontSizes.md,
       fontWeight: '600',
     },
-  });
+  }), [theme]);
 
   const renderRecipe = ({ item }: { item: Recipe }) => (
     <TouchableOpacity
@@ -273,6 +274,9 @@ export default function RecipesScreen({ navigation }: Props) {
         placeholderTextColor={theme.text.tertiary}
         value={searchQuery}
         onChangeText={setSearchQuery}
+        autoCapitalize="none"
+        autoCorrect={false}
+        returnKeyType="search"
         allowFontScaling
         accessibilityLabel="Champ de recherche"
         accessibilityHint="Entrez un nom de recette ou un tag pour filtrer vos recettes"
