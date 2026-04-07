@@ -157,7 +157,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
         { text: 'Annuler', style: 'cancel' },
         {
           text: 'OK',
-          onPress: (url) => {
+          onPress: (url: string | undefined) => {
             if (url && url.trim()) {
               setCoverImage(url.trim());
               setShowCoverOptions(false);
@@ -169,6 +169,8 @@ export default function AddBookScreen({ navigation, route }: Props) {
       coverImage
     );
   };
+
+  const toHttps = (url: string | undefined): string => url ? url.replace(/^http:\/\//, 'https://') : '';
 
   const isCookingBook = (bookData: BookData): boolean => {
     const categories = bookData.categories || [];
@@ -217,7 +219,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
               setEditor(bookData.publisher || '');
               setYear(bookData.publishedDate ? bookData.publishedDate.substring(0, 4) : '');
               setCategory(bookData.categories ? bookData.categories[0] : '');
-              setCoverImage(bookData.imageLinks?.thumbnail || '');
+              setCoverImage(toHttps(bookData.imageLinks?.thumbnail));
               setSearchResults([]);
             }
           }
@@ -231,7 +233,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
       setEditor(bookData.publisher || '');
       setYear(bookData.publishedDate ? bookData.publishedDate.substring(0, 4) : '');
       setCategory(bookData.categories ? bookData.categories[0] : '');
-      setCoverImage(bookData.imageLinks?.thumbnail || '');
+      setCoverImage(toHttps(bookData.imageLinks?.thumbnail));
       setSearchResults([]);
 
       if (showWarningIfNotCooking && isCooking) {
@@ -414,7 +416,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
       >
         {bookData.imageLinks?.thumbnail && (
           <Image
-            source={{ uri: bookData.imageLinks.thumbnail }}
+            source={{ uri: toHttps(bookData.imageLinks.thumbnail) }}
             style={styles.resultThumbnail}
             accessible={true}
             accessibilityLabel={`Couverture de ${title}`}
