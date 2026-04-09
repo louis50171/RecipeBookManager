@@ -104,6 +104,7 @@ function MainDrawer() {
 
   return (
     <Drawer.Navigator
+      id="MainDrawer"
       drawerContent={(props) => <DrawerContent {...props} />}
       screenOptions={{
         headerShown: false,
@@ -134,7 +135,7 @@ function MainDrawer() {
 export default function AppNavigator() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator id="RootStack">
         {/* Écran de base avec le drawer */}
         <Stack.Screen
           name="MainDrawer"

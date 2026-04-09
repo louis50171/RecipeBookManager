@@ -8,7 +8,7 @@
  */
 
 import { StyleSheet, TextStyle, ViewStyle } from 'react-native';
-import { Theme } from '../contexts/ThemeContext';
+import { Theme } from './colors';
 import { spacing, fontSizes, borderRadius, iconSizes } from './responsive';
 
 /**

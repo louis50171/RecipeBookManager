@@ -53,6 +53,7 @@ interface BookData {
   publisher?: string;
   imageLinks?: {
     thumbnail?: string;
+    smallThumbnail?: string;
   };
   categories?: string[];
 }
@@ -170,7 +171,21 @@ export default function AddBookScreen({ navigation, route }: Props) {
     );
   };
 
-  const toHttps = (url: string | undefined): string => url ? url.replace(/^http:\/\//, 'https://') : '';
+  const toHttps = (url: string | undefined): string =>
+    url ? url.replace(/^http:\/\//, 'https://').replace('&edge=curl', '') : '';
+
+  const getBookCoverUrl = (imageLinks: BookData['imageLinks'], volumeId: string): string => {
+    if (imageLinks?.thumbnail) {
+      return toHttps(imageLinks.thumbnail);
+    }
+    if (imageLinks?.smallThumbnail) {
+      return toHttps(imageLinks.smallThumbnail);
+    }
+    if (volumeId) {
+      return `https://books.google.com/books/content?id=${volumeId}&printsec=frontcover&img=1&zoom=1&source=gbs_api`;
+    }
+    return '';
+  };
 
   const isCookingBook = (bookData: BookData): boolean => {
     const categories = bookData.categories || [];
@@ -193,52 +208,35 @@ export default function AddBookScreen({ navigation, route }: Props) {
     return hasCookingCategory || hasCookingInTitle;
   };
 
-  const fillBookData = (bookData: BookData, showWarningIfNotCooking: boolean = false) => {
+  const fillBookData = (item: SearchResult, showWarningIfNotCooking: boolean = false) => {
+    const bookData = item.volumeInfo;
+    const coverUrl = getBookCoverUrl(bookData.imageLinks, item.id);
+
     // Vérifier si c'est un livre de cuisine
     const isCooking = isCookingBook(bookData);
+
+    const applyData = () => {
+      setTitle(bookData.title || '');
+      setAuthor(bookData.authors ? bookData.authors.join(', ') : '');
+      setPseudonym('');
+      setEditor(bookData.publisher || '');
+      setYear(bookData.publishedDate ? bookData.publishedDate.substring(0, 4) : '');
+      setCategory(bookData.categories ? bookData.categories[0] : '');
+      setCoverImage(coverUrl);
+      setSearchResults([]);
+    };
 
     if (showWarningIfNotCooking && !isCooking) {
       Alert.alert(
         '⚠️ Livre hors sujet détecté',
         `Ce livre ne semble pas être un livre de recettes.\n\nCatégories: ${bookData.categories?.join(', ') || 'Aucune'}\n\nVoulez-vous quand même l'ajouter ?`,
         [
-          {
-            text: 'Annuler',
-            style: 'cancel',
-            onPress: () => {
-              // Ne rien remplir
-            }
-          },
-          {
-            text: 'Ajouter quand même',
-            onPress: () => {
-              // Remplir les données
-              setTitle(bookData.title || '');
-              setAuthor(bookData.authors ? bookData.authors.join(', ') : '');
-              setPseudonym(''); // Google Books n'a pas de champ pseudonyme
-              setEditor(bookData.publisher || '');
-              setYear(bookData.publishedDate ? bookData.publishedDate.substring(0, 4) : '');
-              setCategory(bookData.categories ? bookData.categories[0] : '');
-              setCoverImage(toHttps(bookData.imageLinks?.thumbnail));
-              setSearchResults([]);
-            }
-          }
+          { text: 'Annuler', style: 'cancel' },
+          { text: 'Ajouter quand même', onPress: applyData },
         ]
       );
     } else {
-      // Livre de cuisine ou pas de vérification demandée
-      setTitle(bookData.title || '');
-      setAuthor(bookData.authors ? bookData.authors.join(', ') : '');
-      setPseudonym(''); // Google Books n'a pas de champ pseudonyme
-      setEditor(bookData.publisher || '');
-      setYear(bookData.publishedDate ? bookData.publishedDate.substring(0, 4) : '');
-      setCategory(bookData.categories ? bookData.categories[0] : '');
-      setCoverImage(toHttps(bookData.imageLinks?.thumbnail));
-      setSearchResults([]);
-
-      if (showWarningIfNotCooking && isCooking) {
-        Alert.alert('✅ Livre de cuisine', 'Ce livre semble bien être un livre de recettes !');
-      }
+      applyData();
     }
   };
 
@@ -254,7 +252,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
       const data = await response.json();
 
       if (data.items && data.items.length > 0) {
-        fillBookData(data.items[0].volumeInfo, true);
+        fillBookData(data.items[0], true);
       } else {
         Alert.alert('Non trouvé', 'Aucun livre trouvé avec cet ISBN. Essayez la recherche par titre.');
       }
@@ -409,7 +407,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
     return (
       <TouchableOpacity
         style={styles.searchResultCard}
-        onPress={() => fillBookData(bookData)}
+        onPress={() => fillBookData(item)}
         accessibilityRole="button"
         accessibilityLabel={`Sélectionner le livre ${title} par ${author}`}
         accessibilityHint="Appuyez pour remplir le formulaire avec ce livre"
