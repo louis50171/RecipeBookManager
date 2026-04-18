@@ -18,7 +18,7 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ScrollView, Alert, TextInput, Modal } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ScrollView, Alert, TextInput } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -26,6 +26,7 @@ import { useApp } from '../contexts/AppContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { Recipe, Collection } from '../models/types';
 import { spacing, fontSizes, borderRadius, iconSizes } from '../theme/responsive';
+import { Theme } from '../theme/colors';
 
 type CollectionDetailScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'CollectionDetail'>;
 type CollectionDetailScreenRouteProp = RouteProp<RootStackParamList, 'CollectionDetail'>;
@@ -136,7 +137,7 @@ export default function CollectionDetailScreen({ navigation, route }: Props) {
       <View style={currentStyles.recipeHeader}>
         <Text style={currentStyles.recipeName} numberOfLines={1} ellipsizeMode="tail" allowFontScaling>{item.name}</Text>
         <TouchableOpacity
-          onPress={() => toggleFavorite(item.id)}
+          onPress={() => { toggleFavorite(item.id).catch(err => console.error('toggleFavorite error:', err)); }}
           accessibilityLabel={item.isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
           accessibilityRole="button"
         >
@@ -151,7 +152,7 @@ export default function CollectionDetailScreen({ navigation, route }: Props) {
       {item.tags.length > 0 && (
         <View style={currentStyles.tagsPreview}>
           {item.tags.slice(0, 3).map(tag => (
-            <View key={tag} style={currentStyles.tag}>
+            <View key={`${item.id}-${tag}`} style={currentStyles.tag}>
               <Text style={currentStyles.tagText} numberOfLines={1} ellipsizeMode="tail" allowFontScaling>{tag}</Text>
             </View>
           ))}
@@ -281,7 +282,7 @@ export default function CollectionDetailScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = (theme: any) => StyleSheet.create({
+const styles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.background,

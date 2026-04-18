@@ -149,7 +149,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
    */
   const addBook = async (book: Book) => {
     await storage.saveBook(book);
-    await loadData();
+    setBooks(prev => [...prev, book]);
   };
 
   /**
@@ -159,7 +159,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
    */
   const updateBook = async (book: Book) => {
     await storage.updateBook(book);
-    await loadData();
+    setBooks(prev => prev.map(b => b.id === book.id ? book : b));
   };
 
   /**
@@ -173,7 +173,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
    */
   const deleteBook = async (bookId: string): Promise<number> => {
     const detachedCount = await storage.deleteBook(bookId);
-    await loadData();
+    setBooks(prev => prev.filter(b => b.id !== bookId));
+    // Les recettes liées ont été détachées dans le storage — on recharge uniquement les recettes
+    const loadedRecipes = await storage.getRecipes().catch(() => [] as Recipe[]);
+    setRecipes(loadedRecipes);
     return detachedCount;
   };
 
@@ -181,20 +184,23 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
    * Ajoute une nouvelle recette
    *
    * Sauvegarde la recette puis parcourt ses tags pour ajouter automatiquement
-   * les nouveaux tags à la liste globale. Cela permet à l'utilisateur de créer
-   * de nouveaux tags simplement en les utilisant dans une recette.
+   * les nouveaux tags à la liste globale.
    *
    * @param recipe - La recette à ajouter
    */
   const addRecipe = async (recipe: Recipe) => {
     await storage.saveRecipe(recipe);
-    // Ajouter les nouveaux tags automatiquement
+    const newTags: string[] = [];
     for (const tag of recipe.tags) {
       if (tag.trim() && !tags.includes(tag)) {
         await storage.addTag(tag);
+        newTags.push(tag);
       }
     }
-    await loadData();
+    setRecipes(prev => [...prev, recipe]);
+    if (newTags.length > 0) {
+      setTags(prev => [...prev, ...newTags]);
+    }
   };
 
   /**
@@ -206,13 +212,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
    */
   const updateRecipe = async (recipe: Recipe) => {
     await storage.updateRecipe(recipe);
-    // Ajouter les nouveaux tags automatiquement
+    const newTags: string[] = [];
     for (const tag of recipe.tags) {
       if (tag.trim() && !tags.includes(tag)) {
         await storage.addTag(tag);
+        newTags.push(tag);
       }
     }
-    await loadData();
+    setRecipes(prev => prev.map(r => r.id === recipe.id ? recipe : r));
+    if (newTags.length > 0) {
+      setTags(prev => [...prev, ...newTags]);
+    }
   };
 
   /**
@@ -222,7 +232,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
    */
   const deleteRecipe = async (recipeId: string) => {
     await storage.deleteRecipe(recipeId);
-    await loadData();
+    setRecipes(prev => prev.filter(r => r.id !== recipeId));
   };
 
   /**
@@ -234,33 +244,29 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
    */
   const toggleFavorite = async (recipeId: string) => {
     await storage.toggleFavorite(recipeId);
-    await loadData();
+    setRecipes(prev => prev.map(r =>
+      r.id === recipeId ? { ...r, isFavorite: !r.isFavorite } : r
+    ));
   };
 
   /**
    * Ajoute un nouveau tag manuellement
    *
-   * Cette fonction peut être utilisée pour créer des tags avant de les utiliser,
-   * bien que les tags soient aussi créés automatiquement lors de l'ajout/modification
-   * de recettes.
-   *
    * @param tag - Le nouveau tag à ajouter
    */
   const addTag = async (tag: string) => {
     await storage.addTag(tag);
-    await loadData();
+    setTags(prev => [...prev, tag]);
   };
 
   /**
    * Ajoute une nouvelle collection
    *
-   * Sauvegarde la collection puis recharge toutes les données.
-   *
    * @param collection - La collection à ajouter
    */
   const addCollection = async (collection: Collection) => {
     await storage.saveCollection(collection);
-    await loadData();
+    setCollections(prev => [...prev, collection]);
   };
 
   /**
@@ -270,7 +276,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
    */
   const updateCollection = async (collection: Collection) => {
     await storage.updateCollection(collection);
-    await loadData();
+    setCollections(prev => prev.map(c => c.id === collection.id ? collection : c));
   };
 
   /**
@@ -280,7 +286,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
    */
   const deleteCollection = async (collectionId: string) => {
     await storage.deleteCollection(collectionId);
-    await loadData();
+    setCollections(prev => prev.filter(c => c.id !== collectionId));
   };
 
   /**

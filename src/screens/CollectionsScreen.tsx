@@ -24,6 +24,7 @@ import { useApp } from '../contexts/AppContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { Collection } from '../models/types';
 import { spacing, fontSizes, borderRadius, iconSizes, screenDimensions } from '../theme/responsive';
+import { generateId } from '../utils/formatters';
 
 type CollectionsScreenNavigationProp = DrawerNavigationProp<any> & NativeStackNavigationProp<RootStackParamList, 'Collections'>;
 
@@ -51,7 +52,7 @@ export default function CollectionsScreen({ navigation }: Props) {
     }
 
     const newCollection: Collection = {
-      id: Date.now().toString(),
+      id: generateId(),
       name: newCollectionName.trim(),
       tags: selectedTags,
       createdAt: new Date().toISOString(),

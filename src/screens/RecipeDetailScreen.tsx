@@ -36,6 +36,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { Recipe } from '../models/types';
 import { spacing, fontSizes, borderRadius, iconSizes, shadows } from '../theme/responsive';
 import * as ImagePicker from 'expo-image-picker';
+import { Theme } from '../theme/colors';
 
 type RecipeDetailScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'RecipeDetail'>;
 type RecipeDetailScreenRouteProp = RouteProp<RootStackParamList, 'RecipeDetail'>;
@@ -491,7 +492,7 @@ export default function RecipeDetailScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = (theme: any) => StyleSheet.create({
+const styles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.background,

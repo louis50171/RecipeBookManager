@@ -3,6 +3,14 @@
  */
 
 /**
+ * Génère un identifiant unique.
+ * Combine Date.now() et Math.random() pour éviter les collisions.
+ */
+export function generateId(): string {
+  return Date.now().toString(36) + Math.random().toString(36).substring(2);
+}
+
+/**
  * Formate l'affichage d'un auteur avec son pseudonyme
  *
  * Règles d'affichage :

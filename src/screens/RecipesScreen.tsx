@@ -2,7 +2,7 @@
  * src/screens/RecipesScreen.tsx
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
@@ -35,11 +35,11 @@ export default function RecipesScreen({ navigation }: Props) {
     });
   }, [recipes, searchQuery, showFavoritesOnly]);
 
-  const getBookTitle = (bookId?: string) => {
+  const getBookTitle = useCallback((bookId?: string) => {
     if (!bookId) return null;
     const book = books.find(b => b.id === bookId);
     return book ? book.title : null;
-  };
+  }, [books]);
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -280,7 +280,7 @@ export default function RecipesScreen({ navigation }: Props) {
     },
   }), [theme]);
 
-  const renderRecipe = ({ item }: { item: Recipe }) => {
+  const renderRecipe = useCallback(({ item }: { item: Recipe }) => {
     const bookTitle = getBookTitle(item.bookId);
     return (
       <TouchableOpacity
@@ -298,7 +298,7 @@ export default function RecipesScreen({ navigation }: Props) {
             </Text>
             <TouchableOpacity
               style={styles.favoriteButton}
-              onPress={() => toggleFavorite(item.id)}
+              onPress={() => { toggleFavorite(item.id).catch(err => console.error('toggleFavorite error:', err)); }}
               accessibilityLabel={item.isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
               accessibilityRole="button"
             >
@@ -320,7 +320,7 @@ export default function RecipesScreen({ navigation }: Props) {
           {item.tags.length > 0 && (
             <View style={styles.tagsContainer}>
               {item.tags.slice(0, 4).map((tag) => (
-                <View key={tag} style={styles.tag}>
+                <View key={`${item.id}-${tag}`} style={styles.tag}>
                   <Text style={styles.tagText} numberOfLines={1} ellipsizeMode="tail" allowFontScaling>{tag}</Text>
                 </View>
               ))}
@@ -332,7 +332,7 @@ export default function RecipesScreen({ navigation }: Props) {
         </View>
       </TouchableOpacity>
     );
-  };
+  }, [styles, navigation, getBookTitle, toggleFavorite]);
 
   return (
     <View style={styles.container}>

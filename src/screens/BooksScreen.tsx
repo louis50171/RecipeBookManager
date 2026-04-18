@@ -2,7 +2,7 @@
  * src/screens/BooksScreen.tsx
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Image } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
@@ -22,18 +22,18 @@ interface Props {
 /** Génère une couleur de fond déterministe à partir du titre */
 function coverColor(title: string): string {
   const palette = [
-    ['#4A6FA5', '#2D4A78'],
-    ['#C0392B', '#922B21'],
-    ['#27AE60', '#1E8449'],
-    ['#8E44AD', '#6C3483'],
-    ['#D35400', '#A04000'],
-    ['#16A085', '#0E6655'],
-    ['#2980B9', '#1A5276'],
-    ['#F39C12', '#B7770D'],
+    '#4A6FA5',
+    '#C0392B',
+    '#27AE60',
+    '#8E44AD',
+    '#D35400',
+    '#16A085',
+    '#2980B9',
+    '#F39C12',
   ];
   let hash = 0;
   for (let i = 0; i < title.length; i++) hash = title.charCodeAt(i) + ((hash << 5) - hash);
-  return palette[Math.abs(hash) % palette.length][0];
+  return palette[Math.abs(hash) % palette.length];
 }
 
 /** Retourne les initiales du titre (max 2 mots) */
@@ -128,6 +128,15 @@ export default function BooksScreen({ navigation }: Props) {
       paddingVertical: spacing.md,
       fontSize: fontSizes.base,
       color: theme.text.primary,
+    },
+    clearButton: {
+      paddingLeft: spacing.sm,
+      paddingVertical: spacing.md,
+      justifyContent: 'center',
+    },
+    clearButtonText: {
+      fontSize: fontSizes.md,
+      color: theme.text.tertiary,
     },
     listContent: {
       paddingHorizontal: spacing.sm,
@@ -246,7 +255,7 @@ export default function BooksScreen({ navigation }: Props) {
     },
   }), [theme, cardWidth]);
 
-  const renderBook = ({ item }: { item: Book }) => {
+  const renderBook = useCallback(({ item }: { item: Book }) => {
     const bgColor = coverColor(item.title);
     const initials = coverInitials(item.title);
     return (
@@ -280,7 +289,7 @@ export default function BooksScreen({ navigation }: Props) {
         </Text>
       </TouchableOpacity>
     );
-  };
+  }, [styles, navigation]);
 
   return (
     <View style={styles.container}>
@@ -299,7 +308,9 @@ export default function BooksScreen({ navigation }: Props) {
               Ma Bibliothèque
             </Text>
             <Text style={styles.bookCount} allowFontScaling numberOfLines={1}>
-              {books.length} livre{books.length > 1 ? 's' : ''}
+              {searchQuery
+                ? `${filteredBooks.length} / ${books.length} livre${books.length > 1 ? 's' : ''}`
+                : `${books.length} livre${books.length > 1 ? 's' : ''}`}
             </Text>
           </View>
         </View>
@@ -319,6 +330,16 @@ export default function BooksScreen({ navigation }: Props) {
             accessibilityLabel="Champ de recherche"
             accessibilityHint="Entrez un titre, auteur ou catégorie pour filtrer vos livres"
           />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity
+              style={styles.clearButton}
+              onPress={() => setSearchQuery('')}
+              accessibilityLabel="Effacer la recherche"
+              accessibilityRole="button"
+            >
+              <Text style={styles.clearButtonText}>✕</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 

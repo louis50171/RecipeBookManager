@@ -26,6 +26,7 @@ import { useApp } from '../contexts/AppContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { spacing, fontSizes, borderRadius, iconSizes, screenDimensions } from '../theme/responsive';
 import { formatAuthorDisplay } from '../utils/formatters';
+import { Theme } from '../theme/colors';
 
 type BookDetailScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'BookDetail'>;
 type BookDetailScreenRouteProp = RouteProp<RootStackParamList, 'BookDetail'>;
@@ -152,7 +153,7 @@ export default function BookDetailScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = (theme: any) => StyleSheet.create({
+const styles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.background,

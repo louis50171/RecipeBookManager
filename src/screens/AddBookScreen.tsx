@@ -37,6 +37,7 @@ import { Book } from '../models/types';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { spacing, fontSizes, borderRadius, iconSizes } from '../theme/responsive';
+import { generateId } from '../utils/formatters';
 
 type AddBookScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'AddBook'>;
 type AddBookScreenRouteProp = RouteProp<RootStackParamList, 'AddBook'>;
@@ -56,6 +57,7 @@ interface BookData {
     smallThumbnail?: string;
   };
   categories?: string[];
+  industryIdentifiers?: { type: string; identifier: string }[];
 }
 
 interface SearchResult {
@@ -172,17 +174,20 @@ export default function AddBookScreen({ navigation, route }: Props) {
   };
 
   const toHttps = (url: string | undefined): string =>
-    url ? url.replace(/^http:\/\//, 'https://').replace('&edge=curl', '') : '';
+    url ? url.replace(/^http:\/\//, 'https://').replace(/&edge=curl/g, '') : '';
 
-  const getBookCoverUrl = (imageLinks: BookData['imageLinks'], volumeId: string): string => {
+  const getBookCoverUrl = (imageLinks: BookData['imageLinks'], _volumeId: string, industryIdentifiers?: BookData['industryIdentifiers']): string => {
     if (imageLinks?.thumbnail) {
       return toHttps(imageLinks.thumbnail);
     }
     if (imageLinks?.smallThumbnail) {
       return toHttps(imageLinks.smallThumbnail);
     }
-    if (volumeId) {
-      return `https://books.google.com/books/content?id=${volumeId}&printsec=frontcover&img=1&zoom=1&source=gbs_api`;
+    const isbn13 = industryIdentifiers?.find(i => i.type === 'ISBN_13')?.identifier;
+    const isbn10 = industryIdentifiers?.find(i => i.type === 'ISBN_10')?.identifier;
+    const isbnCode = isbn13 || isbn10;
+    if (isbnCode) {
+      return `https://covers.openlibrary.org/b/isbn/${isbnCode}-L.jpg`;
     }
     return '';
   };
@@ -210,7 +215,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
 
   const fillBookData = (item: SearchResult, showWarningIfNotCooking: boolean = false) => {
     const bookData = item.volumeInfo;
-    const coverUrl = getBookCoverUrl(bookData.imageLinks, item.id);
+    const coverUrl = getBookCoverUrl(bookData.imageLinks, item.id, bookData.industryIdentifiers);
 
     // Vérifier si c'est un livre de cuisine
     const isCooking = isCookingBook(bookData);
@@ -256,8 +261,8 @@ export default function AddBookScreen({ navigation, route }: Props) {
       } else {
         Alert.alert('Non trouvé', 'Aucun livre trouvé avec cet ISBN. Essayez la recherche par titre.');
       }
-    } catch (error: any) {
-      if (error?.name !== 'AbortError') {
+    } catch (error) {
+      if (error instanceof Error && error.name !== 'AbortError') {
         Alert.alert('Erreur', 'Impossible de rechercher le livre. Vérifiez votre connexion internet.');
         console.error('ISBN search error:', error);
       }
@@ -296,8 +301,8 @@ export default function AddBookScreen({ navigation, route }: Props) {
         Alert.alert('Non trouvé', 'Aucun livre de cuisine trouvé avec ce titre. Vous pouvez saisir les informations manuellement.');
         setSearchResults([]);
       }
-    } catch (error: any) {
-      if (error?.name !== 'AbortError') {
+    } catch (error) {
+      if (error instanceof Error && error.name !== 'AbortError') {
         Alert.alert('Erreur', 'Impossible de rechercher le livre. Vérifiez votre connexion internet.');
         console.error('Title search error:', error);
       }
@@ -328,8 +333,8 @@ export default function AddBookScreen({ navigation, route }: Props) {
         Alert.alert('Non trouvé', 'Aucun livre de cuisine trouvé pour cet auteur. Vous pouvez saisir les informations manuellement.');
         setSearchResults([]);
       }
-    } catch (error: any) {
-      if (error?.name !== 'AbortError') {
+    } catch (error) {
+      if (error instanceof Error && error.name !== 'AbortError') {
         Alert.alert('Erreur', 'Impossible de rechercher le livre. Vérifiez votre connexion internet.');
         console.error('Author search error:', error);
       }
@@ -385,7 +390,7 @@ export default function AddBookScreen({ navigation, route }: Props) {
       await updateBook(updatedBook);
     } else {
       const newBook: Book = {
-        id: Date.now().toString(),
+        id: generateId(),
         title: title.trim(),
         author: author.trim(),
         pseudonym: pseudonym.trim() || undefined,

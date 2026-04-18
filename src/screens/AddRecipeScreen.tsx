@@ -33,7 +33,7 @@ import { useApp } from '../contexts/AppContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { Recipe } from '../models/types';
 import { spacing, fontSizes, borderRadius } from '../theme/responsive';
-import { formatAuthorDisplay } from '../utils/formatters';
+import { formatAuthorDisplay, generateId } from '../utils/formatters';
 import * as ImagePicker from 'expo-image-picker';
 
 type AddRecipeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'AddRecipe'>;
@@ -136,7 +136,7 @@ export default function AddRecipeScreen({ navigation }: Props) {
     }
 
     const newRecipe: Recipe = {
-      id: Date.now().toString(),
+      id: generateId(),
       name: name.trim(),
       bookId: selectedBookId,
       tags: selectedTags,
