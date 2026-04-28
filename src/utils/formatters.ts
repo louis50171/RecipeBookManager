@@ -48,6 +48,13 @@ export function formatAuthorDisplay(author: string, pseudonym?: string): string 
 }
 
 /**
+ * Convertit une URL HTTP en HTTPS et supprime le paramètre edge=curl de Google Books
+ */
+export function toHttps(url: string | undefined): string {
+  return url ? url.replace(/^http:\/\//, 'https://').replace(/&edge=curl/g, '') : '';
+}
+
+/**
  * Obtient le nom principal de l'auteur (pseudonyme prioritaire)
  * Utile pour les recherches et le tri
  *

@@ -17,7 +17,7 @@
  * - Boutons d'action colorés en bas
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, Image } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
@@ -25,7 +25,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { useApp } from '../contexts/AppContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { spacing, fontSizes, borderRadius, iconSizes, screenDimensions } from '../theme/responsive';
-import { formatAuthorDisplay } from '../utils/formatters';
+import { formatAuthorDisplay, toHttps } from '../utils/formatters';
 import { Theme } from '../theme/colors';
 
 type BookDetailScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'BookDetail'>;
@@ -40,6 +40,7 @@ export default function BookDetailScreen({ navigation, route }: Props) {
   const { bookId } = route.params;
   const { books, recipes, deleteBook } = useApp();
   const { theme } = useTheme();
+  const [coverError, setCoverError] = useState(false);
 
   /** Recherche le livre par son ID */
   const book = books.find(b => b.id === bookId);
@@ -92,8 +93,14 @@ export default function BookDetailScreen({ navigation, route }: Props) {
     <ScrollView style={currentStyles.container}>
       <View style={currentStyles.content}>
         <View style={currentStyles.header}>
-          {book.coverImage ? (
-            <Image source={{ uri: book.coverImage }} style={currentStyles.coverImage} accessible accessibilityLabel={`Couverture du livre ${book.title}`} />
+          {book.coverImage && !coverError ? (
+            <Image
+              source={{ uri: toHttps(book.coverImage) }}
+              style={currentStyles.coverImage}
+              accessible
+              accessibilityLabel={`Couverture du livre ${book.title}`}
+              onError={() => setCoverError(true)}
+            />
           ) : (
             <View style={currentStyles.placeholderCover}>
               <Text style={currentStyles.placeholderIcon}>📚</Text>

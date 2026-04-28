@@ -11,7 +11,7 @@ import { useApp } from '../contexts/AppContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { Book } from '../models/types';
 import { spacing, fontSizes, borderRadius, iconSizes, screenDimensions, deviceType, getResponsiveValue } from '../theme/responsive';
-import { formatAuthorDisplay } from '../utils/formatters';
+import { formatAuthorDisplay, toHttps } from '../utils/formatters';
 
 type BooksScreenNavigationProp = DrawerNavigationProp<any> & NativeStackNavigationProp<RootStackParamList, 'Books'>;
 
@@ -41,6 +41,41 @@ function coverInitials(title: string): string {
   const words = title.trim().split(/\s+/).filter(Boolean);
   if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
   return (words[0][0] + words[1][0]).toUpperCase();
+}
+
+interface BookCoverViewProps {
+  book: Book;
+  coverStyle: object;
+  placeholderStyle: object;
+  initialsStyle: object;
+  titleStyle: object;
+}
+
+function BookCoverView({ book, coverStyle, placeholderStyle, initialsStyle, titleStyle }: BookCoverViewProps) {
+  const [imageError, setImageError] = useState(false);
+  const bgColor = coverColor(book.title);
+  const initials = coverInitials(book.title);
+
+  if (!book.coverImage || imageError) {
+    return (
+      <View style={[placeholderStyle, { backgroundColor: bgColor }]}>
+        <Text style={initialsStyle}>{initials}</Text>
+        <Text style={titleStyle} numberOfLines={2} ellipsizeMode="tail">
+          {book.title}
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <Image
+      source={{ uri: toHttps(book.coverImage) }}
+      style={coverStyle}
+      accessible
+      accessibilityLabel={`Couverture du livre ${book.title}`}
+      onError={() => setImageError(true)}
+    />
+  );
 }
 
 export default function BooksScreen({ navigation }: Props) {
@@ -256,8 +291,6 @@ export default function BooksScreen({ navigation }: Props) {
   }), [theme, cardWidth]);
 
   const renderBook = useCallback(({ item }: { item: Book }) => {
-    const bgColor = coverColor(item.title);
-    const initials = coverInitials(item.title);
     return (
       <TouchableOpacity
         style={styles.bookCard}
@@ -267,21 +300,14 @@ export default function BooksScreen({ navigation }: Props) {
         accessibilityRole="button"
       >
         <View style={styles.bookCover}>
-          {item.coverImage ? (
-            <Image
-              source={{ uri: item.coverImage }}
-              style={styles.coverImage}
-              accessible
-              accessibilityLabel={`Couverture du livre ${item.title}`}
-            />
-          ) : (
-            <View style={[styles.placeholderCover, { backgroundColor: bgColor }]}>
-              <Text style={styles.placeholderInitials}>{initials}</Text>
-              <Text style={styles.placeholderTitle} numberOfLines={2} ellipsizeMode="tail">
-                {item.title}
-              </Text>
-            </View>
-          )}
+          <BookCoverView
+            key={item.coverImage || item.id}
+            book={item}
+            coverStyle={styles.coverImage}
+            placeholderStyle={styles.placeholderCover}
+            initialsStyle={styles.placeholderInitials}
+            titleStyle={styles.placeholderTitle}
+          />
         </View>
         <Text style={styles.bookTitle} numberOfLines={2} ellipsizeMode="tail" allowFontScaling>{item.title}</Text>
         <Text style={styles.bookAuthor} numberOfLines={1} ellipsizeMode="tail" allowFontScaling>
